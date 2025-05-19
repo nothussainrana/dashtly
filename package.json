@@ -13,10 +13,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
     "eslint-config-next": "^14.0.4",
     "next": "^14.0.4",
+    "postcss": "^8.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "serve": "^14.2.1"
+    "serve": "^14.2.1",
+    "tailwindcss": "^4.1.7"
   }
 }
