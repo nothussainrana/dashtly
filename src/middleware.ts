@@ -17,7 +17,8 @@ export const config = {
      * - public folder
      * - login (login page)
      * - register (registration page)
+     * - root path (homepage)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|$).*)",
   ],
 }; 

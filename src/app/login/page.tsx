@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import LoginForm from "./components/LoginForm";
+import { Container, Paper, Typography, Box } from "@mui/material";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -8,15 +9,35 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md space-y-8 px-4">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight">
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
+          py: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            width: '100%',
+            borderRadius: 2,
+          }}
+        >
+          <Typography
+            component="h1"
+            variant="h4"
+            align="center"
+            gutterBottom
+            sx={{ fontWeight: 'bold', mb: 3 }}
+          >
             Sign in to your account
-          </h2>
-        </div>
-        <LoginForm />
-      </div>
-    </div>
+          </Typography>
+          <LoginForm />
+        </Paper>
+      </Box>
+    </Container>
   );
 } 
