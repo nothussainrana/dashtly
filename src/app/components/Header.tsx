@@ -11,16 +11,6 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
 }));
 
-const Logo = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  fontSize: '1.5rem',
-  color: theme.palette.primary.main,
-  textDecoration: 'none',
-  '&:hover': {
-    color: theme.palette.primary.dark,
-  },
-}));
-
 interface HeaderProps {
   session: Session | null;
 }
@@ -30,27 +20,47 @@ export default function Header({ session }: HeaderProps) {
     <StyledAppBar position="sticky">
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-          <Link href="/" passHref style={{ textDecoration: 'none' }}>
-            <Logo>Dashtly</Logo>
+          <Link 
+            href="/" 
+            style={{ 
+              textDecoration: 'none',
+              fontWeight: 700,
+              fontSize: '1.5rem',
+              color: '#1976d2',
+            }}
+          >
+            Dashtly
           </Link>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {session ? (
               <>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Avatar 
-                    sx={{ 
-                      width: 32, 
-                      height: 32, 
-                      bgcolor: 'primary.main',
-                      fontSize: '0.875rem'
+                  <Link 
+                    href="/dashboard" 
+                    style={{
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      color: 'inherit',
                     }}
                   >
-                    {session.user?.name?.[0]?.toUpperCase()}
-                  </Avatar>
-                  <Typography variant="body2" color="text.secondary">
-                    {session.user?.name}
-                  </Typography>
+                    <Avatar 
+                      sx={{ 
+                        width: 32, 
+                        height: 32, 
+                        bgcolor: 'primary.main',
+                        fontSize: '0.875rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {session.user?.name?.[0]?.toUpperCase()}
+                    </Avatar>
+                    <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer' }}>
+                      {session.user?.name}
+                    </Typography>
+                  </Link>
                 </Box>
                 <Button
                   component={Link}
