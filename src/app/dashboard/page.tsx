@@ -2,7 +2,6 @@
 
 import { useSession } from 'next-auth/react';
 import { Container, Paper, Typography, Box, Avatar, Card, CardContent, CardActions, Button } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 
@@ -129,28 +128,34 @@ export default function DashboardPage() {
         ) : products.length === 0 ? (
           <Typography>You have not uploaded any products yet.</Typography>
         ) : (
-          <Grid container spacing={3}>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 1fr)' 
+            }, 
+            gap: 3 
+          }}>
             {products.map((product) => (
-              <Grid item xs={12} sm={6} md={4} key={product.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{product.name}</Typography>
-                    <Typography color="text.secondary">{product.description}</Typography>
-                    <Typography sx={{ mt: 1 }}>
-                      Price: ${product.price}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Status: {product.status}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size="small" disabled>Edit</Button>
-                    <Button size="small" disabled>Delete</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
+              <Card key={product.id}>
+                <CardContent>
+                  <Typography variant="h6">{product.name}</Typography>
+                  <Typography color="text.secondary">{product.description}</Typography>
+                  <Typography sx={{ mt: 1 }}>
+                    Price: ${product.price}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Status: {product.status}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" disabled>Edit</Button>
+                  <Button size="small" disabled>Delete</Button>
+                </CardActions>
+              </Card>
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
     </Container>
