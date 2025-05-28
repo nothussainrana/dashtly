@@ -26,7 +26,7 @@ export default function Header({ session }: HeaderProps) {
               textDecoration: 'none',
               fontWeight: 700,
               fontSize: '1.5rem',
-              color: '#1976d2',
+              color: '#3ab2df',
             }}
           >
             Dashtly
@@ -35,6 +35,15 @@ export default function Header({ session }: HeaderProps) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {session ? (
               <>
+                <Button
+                  component={Link}
+                  href="/products/new"
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                >
+                  Create Product
+                </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Link 
                     href="/dashboard" 
@@ -50,7 +59,7 @@ export default function Header({ session }: HeaderProps) {
                       sx={{ 
                         width: 32, 
                         height: 32, 
-                        bgcolor: 'primary.main',
+                        bgcolor: '#3ab2df',
                         fontSize: '0.875rem',
                         cursor: 'pointer'
                       }}

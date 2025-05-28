@@ -1,8 +1,10 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { Container, Paper, Typography, Box, Avatar } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, Card, CardContent, CardActions, Button } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
+import { useEffect, useState } from 'react';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -17,6 +19,24 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!session) return;
+    setLoading(true);
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load products');
+        setLoading(false);
+      });
+  }, [session]);
 
   if (!session) {
     return null;
@@ -95,6 +115,43 @@ export default function DashboardPage() {
             </Box>
           </StyledPaper>
         </Box>
+      </Box>
+
+      {/* User's Products Section */}
+      <Box sx={{ mt: 6 }}>
+        <Typography variant="h5" gutterBottom>
+          Your Products
+        </Typography>
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : products.length === 0 ? (
+          <Typography>You have not uploaded any products yet.</Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {products.map((product) => (
+              <Grid item xs={12} sm={6} md={4} key={product.id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">{product.name}</Typography>
+                    <Typography color="text.secondary">{product.description}</Typography>
+                    <Typography sx={{ mt: 1 }}>
+                      Price: ${product.price}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Status: {product.status}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" disabled>Edit</Button>
+                    <Button size="small" disabled>Delete</Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Container>
   );

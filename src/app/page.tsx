@@ -12,7 +12,7 @@ const HeroSection = styled(Paper)(({ theme }) => ({
   backgroundSize: 'cover',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  backgroundImage: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+  backgroundImage: 'linear-gradient(45deg, #3ab2df 30%, #96efff 90%)',
   height: '80vh',
   display: 'flex',
   alignItems: 'center',

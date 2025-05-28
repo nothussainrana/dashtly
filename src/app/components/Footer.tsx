@@ -15,7 +15,7 @@ const FooterLink = styled(Link)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textDecoration: 'none',
   '&:hover': {
-    color: theme.palette.primary.main,
+    color: '#3ab2df',
   },
 }));
 
