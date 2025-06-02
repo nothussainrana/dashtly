@@ -58,15 +58,27 @@ model VerificationToken {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   price       Float
-  description String   @db.Text
-  status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description String        @db.Text
+  status      String        @default("active")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images      ProductImage[]
 
   @@index([userId])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  order     Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 } 

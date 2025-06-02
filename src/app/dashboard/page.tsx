@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Container, Paper, Typography, Box, Avatar, Card, CardContent, CardActions, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -138,21 +139,86 @@ export default function DashboardPage() {
             gap: 3 
           }}>
             {products.map((product) => (
-              <Card key={product.id}>
-                <CardContent>
-                  <Typography variant="h6">{product.name}</Typography>
-                  <Typography color="text.secondary">{product.description}</Typography>
-                  <Typography sx={{ mt: 1 }}>
-                    Price: ${product.price}
+              <Card 
+                key={product.id} 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                  }
+                }}
+                onClick={() => window.location.href = `/products/${product.id}`}
+              >
+                {product.images && product.images.length > 0 ? (
+                  <Box sx={{ position: 'relative', height: 200, width: '100%' }}>
+                    <Image
+                      src={product.images[0].url}
+                      alt={product.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      priority
+                    />
+                  </Box>
+                ) : (
+                  <Box 
+                    sx={{ 
+                      height: 200, 
+                      width: '100%', 
+                      bgcolor: 'grey.100',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      No image available
+                    </Typography>
+                  </Box>
+                )}
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {product.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Status: {product.status}
+                  <Typography 
+                    color="text.secondary" 
+                    sx={{ 
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      mb: 1
+                    }}
+                  >
+                    {product.description}
+                  </Typography>
+                  <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                    ${product.price.toFixed(2)}
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      display: 'inline-block',
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1,
+                      bgcolor: product.status === 'active' ? 'success.light' : 
+                              product.status === 'sold' ? 'error.light' : 
+                              'warning.light',
+                      color: product.status === 'active' ? 'success.dark' : 
+                             product.status === 'sold' ? 'error.dark' : 
+                             'warning.dark',
+                      textTransform: 'capitalize',
+                      mt: 1
+                    }}
+                  >
+                    {product.status}
                   </Typography>
                 </CardContent>
-                <CardActions>
-                  <Button size="small" disabled>Edit</Button>
-                  <Button size="small" disabled>Delete</Button>
-                </CardActions>
               </Card>
             ))}
           </Box>

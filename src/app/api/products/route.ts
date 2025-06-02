@@ -16,18 +16,15 @@ if (process.env.NODE_ENV !== 'production') {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    console.log('Session:', session);
 
     if (!session?.user?.id) {
-      console.log('No user ID in session');
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const body = await req.json();
-    console.log('Request body:', body);
     
     // Validate and parse the data
-    const { name, price, description, status } = body;
+    const { name, price, description, status, images } = body;
 
     if (!name || typeof name !== 'string') {
       return new NextResponse(
@@ -50,6 +47,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!Array.isArray(images) || images.length === 0) {
+      return new NextResponse(
+        JSON.stringify({ error: 'At least one image is required' }), 
+        { status: 400 }
+      );
+    }
+
     const validStatuses = ['active', 'inactive', 'sold'];
     if (!status || !validStatuses.includes(status)) {
       return new NextResponse(
@@ -59,22 +63,27 @@ export async function POST(req: Request) {
     }
 
     try {
-      const productData = {
-        name: name.trim(),
-        price: Number(price),
-        description: description.trim(),
-        status,
-        userId: session.user.id
-      };
-
       const product = await prisma.product.create({
-        data: productData
+        data: {
+          name: name.trim(),
+          price: Number(price),
+          description: description.trim(),
+          status,
+          userId: session.user.id,
+          images: {
+            create: images.map((img: { url: string; order: number }) => ({
+              url: img.url,
+              order: img.order
+            }))
+          }
+        },
+        include: {
+          images: true
+        }
       });
       
-      console.log('Created product:', product);
       return NextResponse.json(product);
     } catch (prismaError) {
-      console.error('Prisma error:', prismaError);
       const errorMessage = prismaError instanceof Error ? prismaError.message : 'Unknown database error';
       return new NextResponse(
         JSON.stringify({ 
@@ -85,7 +94,6 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    console.error('[PRODUCTS_POST]', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new NextResponse(
       JSON.stringify({ 
@@ -105,6 +113,13 @@ export async function GET(req: Request) {
     }
     const products = await prisma.product.findMany({
       where: { userId: session.user.id },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(products);

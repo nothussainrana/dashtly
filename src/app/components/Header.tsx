@@ -73,7 +73,7 @@ export default function Header({ session }: HeaderProps) {
                 </Box>
                 <Button
                   component={Link}
-                  href="/api/auth/signout"
+                  href="/signout"
                   variant="outlined"
                   color="primary"
                   size="small"

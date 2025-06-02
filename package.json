@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
+    "@aws-sdk/client-s3": "^3.821.0",
+    "@aws-sdk/s3-request-presigner": "^3.821.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.2.5",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@prisma/client": "^5.22.0",

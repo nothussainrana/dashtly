@@ -2,20 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, 
-  Paper, 
-  Typography, 
-  TextField, 
-  Button, 
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  SelectChangeEvent,
-} from '@mui/material';
+import { MultiImageUpload } from '@/components/MultiImageUpload';
+import { Container, Paper, Typography, Box, TextField, Button, Alert, MenuItem } from '@mui/material';
+
+interface ImageFile {
+  id: string;
+  url: string;
+  file?: File;
+}
 
 export default function NewProduct() {
   const router = useRouter();
@@ -25,18 +19,19 @@ export default function NewProduct() {
     price: string | number;
     description: string;
     status: string;
+    images: ImageFile[];
   }>({
     name: '',
     price: '',
     description: '',
-    status: 'active'
+    status: 'active',
+    images: []
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
-    // Validate form data
     if (!formData.name.trim()) {
       setError('Product name is required');
       return;
@@ -51,6 +46,11 @@ export default function NewProduct() {
       setError('Description is required');
       return;
     }
+
+    if (formData.images.length === 0) {
+      setError('At least one image is required');
+      return;
+    }
     
     try {
       const response = await fetch('/api/products', {
@@ -62,7 +62,11 @@ export default function NewProduct() {
           name: formData.name.trim(),
           price: Number(formData.price),
           description: formData.description.trim(),
-          status: formData.status
+          status: formData.status,
+          images: formData.images.map((img, index) => ({
+            url: img.url,
+            order: index
+          }))
         }),
       });
 
@@ -75,15 +79,13 @@ export default function NewProduct() {
       router.push('/dashboard');
       router.refresh();
     } catch (error) {
-      console.error('Error creating product:', error);
       setError(error instanceof Error ? error.message : 'Failed to create product');
     }
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === 'price') {
-      // Ensure price is handled as a number
       const numValue = value === '' ? '' : Number(value);
       setFormData(prev => ({
         ...prev,
@@ -97,103 +99,100 @@ export default function NewProduct() {
     }
   };
 
-  const handleSelectChange = (e: SelectChangeEvent) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
           Create New Product
         </Typography>
         
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 4 }}>
             {error}
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <TextField
-            fullWidth
             label="Product Name"
             name="name"
             value={formData.name}
             onChange={handleTextChange}
             required
-            margin="normal"
-            error={!!error && !formData.name.trim()}
-            inputProps={{
-              'aria-label': 'Product Name'
-            }}
+            fullWidth
           />
           
           <TextField
-            fullWidth
             label="Price"
             name="price"
             type="number"
             value={formData.price}
             onChange={handleTextChange}
             required
-            margin="normal"
-            inputProps={{ 
+            fullWidth
+            inputProps={{
               step: "0.01",
               min: "0",
-              inputMode: "decimal",
-              'aria-label': 'Price'
+              inputMode: "decimal"
             }}
-            error={!!error && (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0)}
           />
           
           <TextField
-            fullWidth
             label="Description"
             name="description"
             value={formData.description}
             onChange={handleTextChange}
             required
-            margin="normal"
+            fullWidth
             multiline
             rows={4}
-            error={!!error && !formData.description.trim()}
-            inputProps={{
-              'aria-label': 'Description'
-            }}
           />
           
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              name="status"
-              value={formData.status}
-              onChange={handleSelectChange}
-              label="Status"
-            >
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-              <MenuItem value="sold">Sold</MenuItem>
-            </Select>
-          </FormControl>
+          <TextField
+            select
+            label="Status"
+            name="status"
+            value={formData.status}
+            onChange={handleTextChange}
+            fullWidth
+          >
+            <MenuItem value="active">Active</MenuItem>
+            <MenuItem value="inactive">Inactive</MenuItem>
+            <MenuItem value="sold">Sold</MenuItem>
+          </TextField>
+
+          <Box>
+            <Typography variant="subtitle1" gutterBottom>
+              Product Images
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Upload up to 5 images. The first image will be used as the main product image.
+            </Typography>
+            <MultiImageUpload
+              value={formData.images}
+              onChange={(images) => {
+                setFormData(prev => ({ ...prev, images }));
+              }}
+              maxImages={5}
+            />
+          </Box>
           
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <Button
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
+              size="large"
             >
               Create Product
             </Button>
             <Button
+              type="button"
               variant="outlined"
               color="primary"
               fullWidth
+              size="large"
               onClick={() => router.back()}
             >
               Cancel
