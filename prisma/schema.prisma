@@ -20,6 +20,10 @@ model User {
   accounts       Account[]
   sessions       Session[]
   products       Product[]
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  buyerChats       Chat[]    @relation("ChatBuyer")
+  sellerChats      Chat[]    @relation("ChatSeller")
 }
 
 model Account {
@@ -68,6 +72,7 @@ model Product {
   userId      String
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   images      ProductImage[]
+  chats       Chat[]
 
   @@index([userId])
 }
@@ -81,4 +86,39 @@ model ProductImage {
   createdAt DateTime @default(now())
 
   @@index([productId])
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User     @relation("ChatBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId  String
+  seller    User     @relation("ChatSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  Message[]
+
+  @@unique([productId, buyerId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([productId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver  User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+  @@index([receiverId])
 } 

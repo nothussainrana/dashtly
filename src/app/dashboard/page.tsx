@@ -1,10 +1,11 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { Container, Paper, Typography, Box, Avatar, Card, CardContent, CardActions, Button } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { List as ListIcon } from '@mui/icons-material';
+import ProductCard from '@/components/ProductCard';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -119,15 +120,38 @@ export default function DashboardPage() {
 
       {/* User's Products Section */}
       <Box sx={{ mt: 6 }}>
-        <Typography variant="h5" gutterBottom>
-          Your Products
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Your Products
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<ListIcon />}
+            onClick={() => window.location.href = '/products'}
+          >
+            View All Products
+          </Button>
+        </Box>
+
         {loading ? (
           <Typography>Loading...</Typography>
         ) : error ? (
           <Typography color="error">{error}</Typography>
         ) : products.length === 0 ? (
-          <Typography>You have not uploaded any products yet.</Typography>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              You have not uploaded any products yet.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Start by creating your first product.
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => window.location.href = '/products/new'}
+            >
+              Create New Product
+            </Button>
+          </Box>
         ) : (
           <Box sx={{ 
             display: 'grid', 
@@ -138,89 +162,21 @@ export default function DashboardPage() {
             }, 
             gap: 3 
           }}>
-            {products.map((product) => (
-              <Card 
-                key={product.id} 
-                sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  height: '100%',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  }
-                }}
-                onClick={() => window.location.href = `/products/${product.id}`}
-              >
-                {product.images && product.images.length > 0 ? (
-                  <Box sx={{ position: 'relative', height: 200, width: '100%' }}>
-                    <Image
-                      src={product.images[0].url}
-                      alt={product.name}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      priority
-                    />
-                  </Box>
-                ) : (
-                  <Box 
-                    sx={{ 
-                      height: 200, 
-                      width: '100%', 
-                      bgcolor: 'grey.100',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      No image available
-                    </Typography>
-                  </Box>
-                )}
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {product.name}
-                  </Typography>
-                  <Typography 
-                    color="text.secondary" 
-                    sx={{ 
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      mb: 1
-                    }}
-                  >
-                    {product.description}
-                  </Typography>
-                  <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                    ${product.price.toFixed(2)}
-                  </Typography>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      display: 'inline-block',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1,
-                      bgcolor: product.status === 'active' ? 'success.light' : 
-                              product.status === 'sold' ? 'error.light' : 
-                              'warning.light',
-                      color: product.status === 'active' ? 'success.dark' : 
-                             product.status === 'sold' ? 'error.dark' : 
-                             'warning.dark',
-                      textTransform: 'capitalize',
-                      mt: 1
-                    }}
-                  >
-                    {product.status}
-                  </Typography>
-                </CardContent>
-              </Card>
+            {products.slice(0, 6).map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
+          </Box>
+        )}
+
+        {/* Show "View All" button if there are more than 6 products */}
+        {products.length > 6 && (
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Button
+              variant="outlined"
+              onClick={() => window.location.href = '/products'}
+            >
+              View All {products.length} Products
+            </Button>
           </Box>
         )}
       </Box>

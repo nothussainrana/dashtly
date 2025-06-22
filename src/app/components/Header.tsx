@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Session } from "next-auth";
-import { AppBar, Toolbar, Button, Typography, Box, Container, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Button, Typography, Box, Container, Avatar, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { Chat as ChatIcon } from '@mui/icons-material';
+import HeaderSearch from '@/components/HeaderSearch';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -19,7 +21,7 @@ export default function Header({ session }: HeaderProps) {
   return (
     <StyledAppBar position="sticky">
       <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+        <Toolbar disableGutters sx={{ justifyContent: 'space-between', gap: 2 }}>
           <Link 
             href="/" 
             style={{ 
@@ -27,12 +29,17 @@ export default function Header({ session }: HeaderProps) {
               fontWeight: 700,
               fontSize: '1.5rem',
               color: '#3ab2df',
+              flexShrink: 0,
             }}
           >
             Dashtly
           </Link>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', px: 2 }}>
+            <HeaderSearch />
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
             {session ? (
               <>
                 <Button
@@ -43,6 +50,16 @@ export default function Header({ session }: HeaderProps) {
                   size="small"
                 >
                   Create Product
+                </Button>
+                <Button
+                  component={Link}
+                  href="/chat"
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  startIcon={<ChatIcon />}
+                >
+                  Messages
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Link 

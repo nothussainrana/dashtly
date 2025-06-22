@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Chip, CircularProgress } from '@mui/material';
+import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link } from '@mui/material';
 import Image from 'next/image';
+import ChatButton from '@/components/ChatButton';
+
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image: string | null;
+}
 
 interface Product {
   id: string;
@@ -17,6 +25,7 @@ interface Product {
     url: string;
     order: number;
   }[];
+  user: User;
 }
 
 export default function ProductPage() {
@@ -29,7 +38,7 @@ export default function ProductPage() {
     if (!params.id) return;
 
     setLoading(true);
-    fetch(`/api/products/${params.id}`)
+    fetch(`/api/products/${params.id}/public`)
       .then(res => res.json())
       .then(data => {
         console.log('Product data:', data);
@@ -159,6 +168,55 @@ export default function ProductPage() {
             <Typography variant="body1" paragraph>
               {product.description}
             </Typography>
+
+            {/* Seller Information */}
+            <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Listed by
+              </Typography>
+              <Link 
+                href={`/users/${product.user.id}`}
+                sx={{ 
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                <Avatar
+                  src={product.user.image || undefined}
+                  sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    bgcolor: '#3ab2df',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {product.user.name?.[0]?.toUpperCase() || product.user.username?.[0]?.toUpperCase()}
+                </Avatar>
+                <Box>
+                  <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 500 }}>
+                    {product.user.name || product.user.username}
+                  </Typography>
+                  {product.user.name && (
+                    <Typography variant="body2" color="text.secondary">
+                      @{product.user.username}
+                    </Typography>
+                  )}
+                </Box>
+              </Link>
+            </Box>
+
+            {/* Chat Button */}
+            <ChatButton
+              productId={product.id}
+              sellerName={product.user.name}
+              sellerUsername={product.user.username}
+              sellerImage={product.user.image}
+            />
 
             <Typography variant="body2" color="text.secondary">
               Listed on {new Date(product.createdAt).toLocaleDateString()}
