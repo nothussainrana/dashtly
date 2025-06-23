@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Avatar, CircularProgress, Grid, Card, CardContent, CardMedia } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 
@@ -117,7 +118,7 @@ export default function UserProfilePage() {
         ) : (
           <Grid container spacing={3}>
             {products.map((product) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
                 <ProductCard product={product} />
               </Grid>
             ))}
