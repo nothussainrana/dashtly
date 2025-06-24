@@ -20,6 +20,11 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const validatePassword = (password: string) => {
+    // At least 6 chars, one number, one lowercase, one uppercase, one letter
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -30,6 +35,12 @@ export default function RegisterForm() {
     const username = formData.get("username") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+
+    if (!validatePassword(password)) {
+      setError("Password must be at least 6 characters and include a number, a lowercase letter, and an uppercase letter.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/register", {

@@ -19,6 +19,12 @@ export async function POST(request: Request) {
       return new NextResponse("Username can only contain letters, numbers, and underscores", { status: 400 });
     }
 
+    // Password complexity: at least 6 chars, one number, one lowercase, one uppercase
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    if (!passwordRegex.test(password)) {
+      return new NextResponse("Password must be at least 6 characters and include a number, a lowercase letter, and an uppercase letter", { status: 400 });
+    }
+
     // Check for existing email
     const existingEmail = await prisma.user.findUnique({
       where: {
