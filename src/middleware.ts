@@ -17,8 +17,10 @@ export const config = {
      * - public folder
      * - login (login page)
      * - register (registration page)
+     * - verify-email (email verification page)
+     * - resend-verification (resend verification page)
      * - root path (homepage)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|verify-email|resend-verification|$).*)",
   ],
 }; 
