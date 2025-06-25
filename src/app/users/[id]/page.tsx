@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 
@@ -116,13 +115,20 @@ export default function UserProfilePage() {
             </Typography>
           </Paper>
         ) : (
-          <Grid container spacing={3}>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)'
+            }, 
+            gap: 3 
+          }}>
             {products.map((product) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
-                <ProductCard product={product} />
-              </Grid>
+              <ProductCard key={product.id} product={product} />
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
     </Container>

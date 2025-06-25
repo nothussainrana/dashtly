@@ -1,9 +1,11 @@
 const brevo = require('@getbrevo/brevo');
 
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.authentications['api-key'].apiKey = process.env.BREVO_API_KEY || '';
-
 export async function sendVerificationEmail(email: string, name: string, verificationCode: string) {
+  let apiInstance = new brevo.TransactionalEmailsApi();
+  
+  let apiKey = apiInstance.authentications['api-key'];
+  apiKey.apiKey = process.env.BREVO_API_KEY || '';
+  
   const sendSmtpEmail = new brevo.SendSmtpEmail();
   
   sendSmtpEmail.subject = "Verify your email address";
