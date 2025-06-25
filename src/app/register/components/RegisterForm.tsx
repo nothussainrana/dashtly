@@ -61,7 +61,9 @@ export default function RegisterForm() {
         throw new Error(data);
       }
 
-      router.push("/login");
+      const result = await response.json();
+      // Redirect to email verification page with email parameter
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);

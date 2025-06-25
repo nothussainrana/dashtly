@@ -8,22 +8,24 @@ generator client {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  username       String    @unique
-  email          String    @unique
-  emailVerified  DateTime?
-  image          String?
-  hashedPassword String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  accounts       Account[]
-  sessions       Session[]
-  products       Product[]
-  sentMessages     Message[] @relation("MessageSender")
-  receivedMessages Message[] @relation("MessageReceiver")
-  buyerChats       Chat[]    @relation("ChatBuyer")
-  sellerChats      Chat[]    @relation("ChatSeller")
+  id                    String    @id @default(cuid())
+  name                  String?
+  username              String    @unique
+  email                 String    @unique
+  emailVerified         DateTime?
+  emailVerificationCode String?
+  emailVerificationExpiry DateTime?
+  image                 String?
+  hashedPassword        String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  products              Product[]
+  sentMessages          Message[] @relation("MessageSender")
+  receivedMessages      Message[] @relation("MessageReceiver")
+  buyerChats            Chat[]    @relation("ChatBuyer")
+  sellerChats           Chat[]    @relation("ChatSeller")
 }
 
 model Account {

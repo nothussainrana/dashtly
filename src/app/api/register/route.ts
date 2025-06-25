@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { sendVerificationEmail, generateVerificationCode, getVerificationCodeExpiry } from "@/lib/email";
 
 const prisma = new PrismaClient();
 
@@ -48,17 +49,38 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const verificationCode = generateVerificationCode();
+    const verificationExpiry = getVerificationCodeExpiry();
 
+    // Create user with verification code (emailVerified is null until verified)
     const user = await prisma.user.create({
       data: {
         email,
         name,
         username,
-        hashedPassword
+        hashedPassword,
+        emailVerificationCode: verificationCode,
+        emailVerificationExpiry: verificationExpiry,
+        emailVerified: null // User is not verified yet
       }
     });
 
-    return NextResponse.json(user);
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, name, verificationCode);
+    } catch (emailError) {
+      // If email fails, delete the user to prevent partial registration
+      await prisma.user.delete({
+        where: { id: user.id }
+      });
+      console.error("[EMAIL_ERROR]", emailError);
+      return new NextResponse("Failed to send verification email. Please try again.", { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      message: "Registration successful. Please check your email for verification code.",
+      userId: user.id 
+    });
   } catch (error) {
     console.log("[REGISTER_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });

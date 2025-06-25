@@ -20,11 +20,13 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailNeedsVerification, setEmailNeedsVerification] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setEmailNeedsVerification(null);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -38,7 +40,12 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        if (result.error.includes("verify your email")) {
+          setEmailNeedsVerification(email);
+          setError("Please verify your email address before signing in");
+        } else {
+          setError("Invalid email or password");
+        }
         return;
       }
 
@@ -56,6 +63,16 @@ export default function LoginForm() {
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
+          {emailNeedsVerification && (
+            <Box sx={{ mt: 1 }}>
+              <Link 
+                href={`/verify-email?email=${encodeURIComponent(emailNeedsVerification)}`}
+                style={{ color: 'inherit', textDecoration: 'underline' }}
+              >
+                Click here to verify your email
+              </Link>
+            </Box>
+          )}
         </Alert>
       )}
       
