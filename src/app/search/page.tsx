@@ -135,6 +135,9 @@ export default function SearchPage() {
             Showing results for "{initialQuery}"
           </Typography>
         )}
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Search by product name, description, or seller username
+        </Typography>
       </Box>
 
       {/* Filters */}

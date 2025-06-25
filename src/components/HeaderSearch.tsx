@@ -137,7 +137,7 @@ export default function HeaderSearch() {
     <Box sx={{ position: 'relative', width: '100%', maxWidth: 600 }}>
       <TextField
         id="search-input"
-        placeholder="Search all products..."
+        placeholder="Search products by name, description, or username..."
         value={query}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}

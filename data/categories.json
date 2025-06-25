@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Electronics",
+    "description": "Electronic devices and gadgets"
+  },
+  {
+    "name": "Clothing",
+    "description": "Apparel and fashion items"
+  },
+  {
+    "name": "Home & Garden",
+    "description": "Home improvement and garden supplies"
+  },
+  {
+    "name": "Sports & Outdoors",
+    "description": "Sports equipment and outdoor gear"
+  },
+  {
+    "name": "Books & Media",
+    "description": "Books, movies, music, and other media"
+  },
+  {
+    "name": "Toys & Games",
+    "description": "Toys, games, and entertainment items"
+  },
+  {
+    "name": "Health & Beauty",
+    "description": "Health products and beauty supplies"
+  },
+  {
+    "name": "Automotive",
+    "description": "Car parts and automotive accessories"
+  },
+  {
+    "name": "Jewelry & Watches",
+    "description": "Jewelry, watches, and accessories"
+  },
+  {
+    "name": "Art & Collectibles",
+    "description": "Artwork, antiques, and collectibles"
+  },
+  {
+    "name": "Food & Beverages",
+    "description": "Food items and beverages"
+  },
+  {
+    "name": "Other",
+    "description": "Miscellaneous items"
+  }
+] 

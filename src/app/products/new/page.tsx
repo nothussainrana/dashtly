@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MultiImageUpload } from '@/components/MultiImageUpload';
-import { Container, Paper, Typography, Box, TextField, Button, Alert, MenuItem } from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, Alert, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 
 interface ImageFile {
   id: string;
@@ -11,22 +11,59 @@ interface ImageFile {
   file?: File;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export default function NewProduct() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState<{
     name: string;
     price: string | number;
     description: string;
     status: string;
+    categoryId: string;
     images: ImageFile[];
   }>({
     name: '',
     price: '',
     description: '',
     status: 'active',
+    categoryId: '',
     images: []
   });
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        console.log('Fetching categories...');
+        const response = await fetch('/api/categories');
+        console.log('Categories response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Categories data:', data);
+          setCategories(data);
+        } else {
+          console.error('Failed to fetch categories, status:', response.status);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +84,11 @@ export default function NewProduct() {
       return;
     }
 
+    if (!formData.categoryId) {
+      setError('Please select a category');
+      return;
+    }
+
     if (formData.images.length === 0) {
       setError('At least one image is required');
       return;
@@ -63,6 +105,7 @@ export default function NewProduct() {
           price: Number(formData.price),
           description: formData.description.trim(),
           status: formData.status,
+          categoryId: formData.categoryId,
           images: formData.images.map((img, index) => ({
             url: img.url,
             order: index
@@ -99,6 +142,14 @@ export default function NewProduct() {
     }
   };
 
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name as string]: value as string
+    }));
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
@@ -113,6 +164,14 @@ export default function NewProduct() {
         )}
         
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {/* Debug info */}
+          {process.env.NODE_ENV === 'development' && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Categories loaded: {categories.length}, Loading: {loadingCategories.toString()}
+              {categories.length > 0 && <div>First category: {categories[0].name}</div>}
+            </Alert>
+          )}
+          
           <TextField
             label="Product Name"
             name="name"
@@ -136,6 +195,23 @@ export default function NewProduct() {
               inputMode: "decimal"
             }}
           />
+
+          <FormControl fullWidth required>
+            <InputLabel>Category</InputLabel>
+            <Select
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleSelectChange}
+              label="Category"
+              disabled={loadingCategories}
+            >
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           
           <TextField
             label="Description"

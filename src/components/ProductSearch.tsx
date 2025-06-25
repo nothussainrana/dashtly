@@ -25,8 +25,15 @@ import {
 } from '@mui/icons-material';
 import { debounce } from 'lodash';
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface SearchFilters {
   query: string;
+  categoryId: string;
   minPrice: number | null;
   maxPrice: number | null;
   status: string;
@@ -63,8 +70,11 @@ export default function ProductSearch({
   showFilters = true,
   showSort = true,
 }: ProductSearchProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
+    categoryId: '',
     minPrice: null,
     maxPrice: null,
     status: '',
@@ -74,6 +84,27 @@ export default function ProductSearch({
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        } else {
+          console.error('Failed to fetch categories');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -117,6 +148,7 @@ export default function ProductSearch({
   const handleClearFilters = () => {
     const clearedFilters: SearchFilters = {
       query: '',
+      categoryId: '',
       minPrice: null,
       maxPrice: null,
       status: '',
@@ -129,7 +161,7 @@ export default function ProductSearch({
   };
 
   // Check if any filters are active
-  const hasActiveFilters = filters.query || filters.minPrice || filters.maxPrice || filters.status;
+  const hasActiveFilters = filters.query || filters.categoryId || filters.minPrice || filters.maxPrice || filters.status;
 
   return (
     <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
@@ -137,7 +169,7 @@ export default function ProductSearch({
       <Box sx={{ mb: 2 }}>
         <TextField
           fullWidth
-          placeholder="Search products by name or description..."
+          placeholder="Search products by name, description, username, or category..."
           value={filters.query}
           onChange={handleQueryChange}
           InputProps={{
@@ -205,89 +237,107 @@ export default function ProductSearch({
       </Box>
 
       {/* Advanced Filters */}
-      {showFilters && (
-        <Collapse in={showAdvancedFilters}>
-          <Divider sx={{ mb: 2 }} />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-            {/* Status Filter */}
-            <Box sx={{ minWidth: 200, flex: 1 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filters.status}
-                  label="Status"
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                >
-                  {STATUS_OPTIONS.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
+      <Collapse in={showAdvancedFilters}>
+        <Divider sx={{ mb: 3 }} />
+        
+        {/* Category Filter */}
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={filters.categoryId}
+              label="Category"
+              onChange={(e) => handleFilterChange('categoryId', e.target.value)}
+              disabled={loadingCategories}
+            >
+              <MenuItem value="">All Categories</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
-            {/* Sort Options */}
-            {showSort && (
-              <>
-                <Box sx={{ minWidth: 200, flex: 1 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Sort By</InputLabel>
-                    <Select
-                      value={filters.sortBy}
-                      label="Sort By"
-                      onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                    >
-                      {SORT_OPTIONS.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <Box sx={{ minWidth: 200, flex: 1 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Order</InputLabel>
-                    <Select
-                      value={filters.sortOrder}
-                      label="Order"
-                      onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
-                    >
-                      <MenuItem value="asc">Ascending</MenuItem>
-                      <MenuItem value="desc">Descending</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </>
-            )}
+        {/* Status and Sort Filters */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ minWidth: 200, flex: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={filters.status}
+                label="Status"
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+              >
+                {STATUS_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Box>
 
-          {/* Price Range */}
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="body2" gutterBottom>
-              Price Range: ${priceRange[0]} - ${priceRange[1]}
-            </Typography>
-            <Slider
-              value={priceRange}
-              onChange={handlePriceRangeChange}
-              onChangeCommitted={handlePriceRangeCommit}
-              valueLabelDisplay="auto"
-              min={0}
-              max={1000}
-              step={10}
-              marks={[
-                { value: 0, label: '$0' },
-                { value: 250, label: '$250' },
-                { value: 500, label: '$500' },
-                { value: 750, label: '$750' },
-                { value: 1000, label: '$1000' },
-              ]}
-            />
-          </Box>
-        </Collapse>
-      )}
+          {showSort && (
+            <>
+              <Box sx={{ minWidth: 200, flex: 1 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sort By</InputLabel>
+                  <Select
+                    value={filters.sortBy}
+                    label="Sort By"
+                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  >
+                    {SORT_OPTIONS.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box sx={{ minWidth: 200, flex: 1 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Order</InputLabel>
+                  <Select
+                    value={filters.sortOrder}
+                    label="Order"
+                    onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
+                  >
+                    <MenuItem value="asc">Ascending</MenuItem>
+                    <MenuItem value="desc">Descending</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </>
+          )}
+        </Box>
+
+        {/* Price Range */}
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="body2" gutterBottom>
+            Price Range: ${priceRange[0]} - ${priceRange[1]}
+          </Typography>
+          <Slider
+            value={priceRange}
+            onChange={handlePriceRangeChange}
+            onChangeCommitted={handlePriceRangeCommit}
+            valueLabelDisplay="auto"
+            min={0}
+            max={1000}
+            step={10}
+            marks={[
+              { value: 0, label: '$0' },
+              { value: 250, label: '$250' },
+              { value: 500, label: '$500' },
+              { value: 750, label: '$750' },
+              { value: 1000, label: '$1000' },
+            ]}
+          />
+        </Box>
+      </Collapse>
     </Paper>
   );
 } 

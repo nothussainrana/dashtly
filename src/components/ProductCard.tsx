@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Image from 'next/image';
 
@@ -23,6 +23,11 @@ interface ProductImage {
   order: number;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 interface ProductCardProps {
   product: {
     id: string;
@@ -31,6 +36,7 @@ interface ProductCardProps {
     description: string;
     status: string;
     images?: ProductImage[];
+    category?: Category;
   };
   onClick?: () => void;
 }
@@ -91,6 +97,17 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         <Typography variant="h6" gutterBottom>
           {product.name}
         </Typography>
+        
+        {/* Category Chip */}
+        {product.category && (
+          <Chip
+            label={product.category.name}
+            size="small"
+            variant="outlined"
+            sx={{ mb: 1 }}
+          />
+        )}
+        
         <Typography 
           color="text.secondary" 
           sx={{ 

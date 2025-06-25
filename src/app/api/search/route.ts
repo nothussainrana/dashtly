@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q') || '';
+    const categoryId = searchParams.get('categoryId');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const page = parseInt(searchParams.get('page') || '1');
@@ -29,7 +30,12 @@ export async function GET(req: Request) {
       status: 'active', // Only show active products
     };
 
-    // Text search in name and description
+    // Category filtering
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    // Text search in name, description, username, and category name
     if (query.trim()) {
       where.OR = [
         {
@@ -42,6 +48,22 @@ export async function GET(req: Request) {
           description: {
             contains: query.trim(),
             mode: 'insensitive' as const,
+          },
+        },
+        {
+          user: {
+            username: {
+              contains: query.trim(),
+              mode: 'insensitive' as const,
+            },
+          },
+        },
+        {
+          category: {
+            name: {
+              contains: query.trim(),
+              mode: 'insensitive' as const,
+            },
           },
         },
       ];
@@ -89,6 +111,12 @@ export async function GET(req: Request) {
             id: true,
             name: true,
             username: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },

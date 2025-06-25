@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     // Validate and parse the data
-    const { name, price, description, status, images } = body;
+    const { name, price, description, status, categoryId, images } = body;
 
     if (!name || typeof name !== 'string') {
       return new NextResponse(
@@ -43,6 +43,13 @@ export async function POST(req: Request) {
     if (!description || typeof description !== 'string') {
       return new NextResponse(
         JSON.stringify({ error: 'Invalid description' }), 
+        { status: 400 }
+      );
+    }
+
+    if (!categoryId || typeof categoryId !== 'string') {
+      return new NextResponse(
+        JSON.stringify({ error: 'Category is required' }), 
         { status: 400 }
       );
     }
@@ -69,6 +76,7 @@ export async function POST(req: Request) {
           price: Number(price),
           description: description.trim(),
           status,
+          categoryId,
           userId: session.user.id,
           images: {
             create: images.map((img: { url: string; order: number }) => ({
@@ -78,7 +86,8 @@ export async function POST(req: Request) {
           }
         },
         include: {
-          images: true
+          images: true,
+          category: true
         }
       });
       

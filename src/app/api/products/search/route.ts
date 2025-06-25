@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       userId: session.user.id,
     };
 
-    // Text search in name and description
+    // Text search in name, description, and username
     if (query.trim()) {
       where.OR = [
         {
@@ -50,6 +50,14 @@ export async function GET(req: Request) {
           description: {
             contains: query.trim(),
             mode: 'insensitive' as const,
+          },
+        },
+        {
+          user: {
+            username: {
+              contains: query.trim(),
+              mode: 'insensitive' as const,
+            },
           },
         },
       ];
