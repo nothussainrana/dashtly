@@ -17,7 +17,7 @@ declare module "next-auth" {
 
 const prisma = new PrismaClient();
 
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -39,6 +39,11 @@ export const authOptions: AuthOptions = {
 
         if (!user || !user?.hashedPassword) {
           throw new Error("Invalid credentials");
+        }
+
+        // Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error('Please verify your email address before signing in');
         }
 
         const isCorrectPassword = await bcrypt.compare(
