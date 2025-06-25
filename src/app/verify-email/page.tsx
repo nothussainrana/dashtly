@@ -56,8 +56,16 @@ export default function VerifyEmailPage() {
       });
 
       if (!response.ok) {
-        const data = await response.text();
-        throw new Error(data);
+        let errorMsg = "";
+        try {
+          // Try to parse error as JSON
+          const data = await response.json();
+          errorMsg = data.message || JSON.stringify(data);
+        } catch {
+          // Fallback to plain text
+          errorMsg = await response.text();
+        }
+        throw new Error(errorMsg || "Unknown error");
       }
 
       const result = await response.json();
