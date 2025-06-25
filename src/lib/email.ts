@@ -3,8 +3,7 @@ const brevo = require('@getbrevo/brevo');
 export async function sendVerificationEmail(email: string, name: string, verificationCode: string) {
   let apiInstance = new brevo.TransactionalEmailsApi();
   
-  let apiKey = apiInstance.authentications['api-key'];
-  apiKey.apiKey = process.env.BREVO_API_KEY || '';
+  apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
   
   const sendSmtpEmail = new brevo.SendSmtpEmail();
   
