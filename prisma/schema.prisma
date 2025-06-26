@@ -26,6 +26,8 @@ model User {
   receivedMessages      Message[] @relation("MessageReceiver")
   buyerChats            Chat[]    @relation("ChatBuyer")
   sellerChats           Chat[]    @relation("ChatSeller")
+  sentOffers            Offer[]   @relation("OfferSender")
+  receivedOffers        Offer[]   @relation("OfferReceiver")
 }
 
 model Account {
@@ -115,6 +117,7 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   messages  Message[]
+  offers    Offer[]
 
   @@unique([productId, buyerId])
   @@index([buyerId])
@@ -137,4 +140,30 @@ model Message {
   @@index([chatId])
   @@index([senderId])
   @@index([receiverId])
+}
+
+model Offer {
+  id          String      @id @default(cuid())
+  chatId      String
+  chat        Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User        @relation("OfferSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User        @relation("OfferReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  amount      Float
+  status      OfferStatus @default(PENDING)
+  message     String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([chatId])
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 } 

@@ -266,6 +266,17 @@ export default function ChatButton({ productId, sellerName, sellerUsername, sell
           <Button onClick={() => setOpen(false)}>
             Close
           </Button>
+          {chatId && (
+            <Button 
+              variant="contained" 
+              onClick={() => {
+                setOpen(false);
+                window.location.href = `/chat/${chatId}`;
+              }}
+            >
+              View Full Chat
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>

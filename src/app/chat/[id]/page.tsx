@@ -15,13 +15,41 @@ import {
   Alert,
   IconButton,
   Divider,
-  Chip
+  Chip,
+  Tabs,
+  Tab
 } from '@mui/material';
-import { Send as SendIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { 
+  Send as SendIcon, 
+  ArrowBack as ArrowBackIcon,
+  LocalOffer as OfferIcon
+} from '@mui/icons-material';
+import OfferDialog from '@/components/OfferDialog';
+import OfferCard from '@/components/OfferCard';
 
 interface Message {
   id: string;
   content: string;
+  createdAt: string;
+  sender: {
+    id: string;
+    name: string;
+    username: string;
+    image: string | null;
+  };
+  receiver: {
+    id: string;
+    name: string;
+    username: string;
+    image: string | null;
+  };
+}
+
+interface Offer {
+  id: string;
+  amount: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+  message?: string;
   createdAt: string;
   sender: {
     id: string;
@@ -67,10 +95,13 @@ export default function ChatDetailPage() {
   
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -91,16 +122,25 @@ export default function ChatDetailPage() {
 
   useEffect(() => {
     if (chatId) {
-      // Poll for new messages every 3 seconds
+      // Poll for new messages and offers every 3 seconds
       const interval = setInterval(async () => {
         try {
-          const response = await fetch(`/api/chat/${chatId}/messages`);
-          if (response.ok) {
-            const messagesData = await response.json();
+          const [messagesResponse, offersResponse] = await Promise.all([
+            fetch(`/api/chat/${chatId}/messages`),
+            fetch(`/api/chat/${chatId}/offers`)
+          ]);
+          
+          if (messagesResponse.ok) {
+            const messagesData = await messagesResponse.json();
             setMessages(messagesData);
           }
+          
+          if (offersResponse.ok) {
+            const offersData = await offersResponse.json();
+            setOffers(offersData);
+          }
         } catch (err) {
-          console.error('Failed to poll for messages:', err);
+          console.error('Failed to poll for updates:', err);
         }
       }, 3000);
 
@@ -122,11 +162,20 @@ export default function ChatDetailPage() {
       const chatData = await chatResponse.json();
       setChat(chatData);
 
-      // Fetch messages
-      const messagesResponse = await fetch(`/api/chat/${chatId}/messages`);
+      // Fetch messages and offers
+      const [messagesResponse, offersResponse] = await Promise.all([
+        fetch(`/api/chat/${chatId}/messages`),
+        fetch(`/api/chat/${chatId}/offers`)
+      ]);
+      
       if (messagesResponse.ok) {
         const messagesData = await messagesResponse.json();
         setMessages(messagesData);
+      }
+      
+      if (offersResponse.ok) {
+        const offersData = await offersResponse.json();
+        setOffers(offersData);
       }
     } catch (err) {
       setError('Failed to load chat');
@@ -177,6 +226,36 @@ export default function ChatDetailPage() {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+  };
+
+  const handleOfferCreated = async () => {
+    // Refresh offers after creating one
+    try {
+      const response = await fetch(`/api/chat/${chatId}/offers`);
+      if (response.ok) {
+        const offersData = await response.json();
+        setOffers(offersData);
+      }
+    } catch (err) {
+      console.error('Failed to refresh offers:', err);
+    }
+  };
+
+  const handleOfferUpdated = async () => {
+    // Refresh offers after updating one
+    try {
+      const response = await fetch(`/api/chat/${chatId}/offers`);
+      if (response.ok) {
+        const offersData = await response.json();
+        setOffers(offersData);
+      }
+    } catch (err) {
+      console.error('Failed to refresh offers:', err);
+    }
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
   };
 
   if (status === 'loading' || loading) {
@@ -256,86 +335,156 @@ export default function ChatDetailPage() {
         </Alert>
       )}
 
-      {/* Messages */}
-      <Paper sx={{ height: 500, display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ 
-          flex: 1, 
-          overflowY: 'auto', 
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1
-        }}>
-          {messages.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
-              Start a conversation with {otherUser?.name || otherUser?.username}
-            </Typography>
-          ) : (
-            messages.map((message) => (
-              <Box
-                key={message.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: message.sender.id === session.user.id ? 'flex-end' : 'flex-start',
-                  mb: 1
-                }}
-              >
-                <Box
-                  sx={{
-                    maxWidth: '70%',
-                    p: 1.5,
-                    borderRadius: 2,
-                    bgcolor: message.sender.id === session.user.id ? 'primary.main' : 'grey.100',
-                    color: message.sender.id === session.user.id ? 'white' : 'text.primary',
-                    wordBreak: 'break-word'
-                  }}
-                >
-                  <Typography variant="body2">
-                    {message.content}
-                  </Typography>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      opacity: 0.7,
-                      display: 'block',
-                      mt: 0.5
-                    }}
-                  >
-                    {formatTime(message.createdAt)}
-                  </Typography>
-                </Box>
-              </Box>
-            ))
-          )}
-          <div ref={messagesEndRef} />
+      {/* Chat Tabs */}
+      <Paper sx={{ height: 600, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tab label="Messages" />
+            <Tab label={`Offers (${offers.length})`} />
+          </Tabs>
         </Box>
 
-        {/* Message Input */}
-        <Divider />
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <TextField
-              fullWidth
-              placeholder="Type your message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={sending}
-              multiline
-              maxRows={3}
-              size="small"
-            />
-            <Button
-              variant="contained"
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim() || sending}
-              sx={{ minWidth: 'auto', px: 2 }}
-            >
-              {sending ? <CircularProgress size={20} /> : <SendIcon />}
-            </Button>
-          </Box>
-        </Box>
+        {/* Tab Content */}
+        {tabValue === 0 && (
+          <>
+            {/* Messages */}
+            <Box sx={{ 
+              flex: 1, 
+              overflowY: 'auto', 
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1
+            }}>
+              {messages.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
+                  Start a conversation with {otherUser?.name || otherUser?.username}
+                </Typography>
+              ) : (
+                messages.map((message) => (
+                  <Box
+                    key={message.id}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: message.sender.id === session.user.id ? 'flex-end' : 'flex-start',
+                      mb: 1
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        maxWidth: '70%',
+                        p: 1.5,
+                        borderRadius: 2,
+                        bgcolor: message.sender.id === session.user.id ? 'primary.main' : 'grey.100',
+                        color: message.sender.id === session.user.id ? 'white' : 'text.primary',
+                        wordBreak: 'break-word'
+                      }}
+                    >
+                      <Typography variant="body2">
+                        {message.content}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          opacity: 0.7,
+                          display: 'block',
+                          mt: 0.5
+                        }}
+                      >
+                        {formatTime(message.createdAt)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </Box>
+
+            {/* Message Input */}
+            <Divider />
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setOfferDialogOpen(true)}
+                  startIcon={<OfferIcon />}
+                  sx={{ minWidth: 'auto', px: 2 }}
+                >
+                  Make Offer
+                </Button>
+                <TextField
+                  fullWidth
+                  placeholder="Type your message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={sending}
+                  multiline
+                  maxRows={3}
+                  size="small"
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || sending}
+                  sx={{ minWidth: 'auto', px: 2 }}
+                >
+                  {sending ? <CircularProgress size={20} /> : <SendIcon />}
+                </Button>
+              </Box>
+            </Box>
+          </>
+        )}
+
+        {tabValue === 1 && (
+          <>
+            {/* Offers */}
+            <Box sx={{ 
+              flex: 1, 
+              overflowY: 'auto', 
+              p: 2
+            }}>
+              {offers.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
+                  No offers yet. Be the first to make an offer!
+                </Typography>
+              ) : (
+                offers.map((offer) => (
+                  <OfferCard
+                    key={offer.id}
+                    offer={offer}
+                    currentUserId={session.user.id}
+                    onOfferUpdated={handleOfferUpdated}
+                  />
+                ))
+              )}
+            </Box>
+
+            {/* Offer Button */}
+            <Divider />
+            <Box sx={{ p: 2 }}>
+              <Button
+                variant="contained"
+                onClick={() => setOfferDialogOpen(true)}
+                startIcon={<OfferIcon />}
+                fullWidth
+              >
+                Make New Offer
+              </Button>
+            </Box>
+          </>
+        )}
       </Paper>
+
+      {/* Offer Dialog */}
+      <OfferDialog
+        open={offerDialogOpen}
+        onClose={() => setOfferDialogOpen(false)}
+        chatId={chatId}
+        productName={chat.product.name}
+        originalPrice={chat.product.price}
+        onOfferCreated={handleOfferCreated}
+      />
     </Container>
   );
 } 
