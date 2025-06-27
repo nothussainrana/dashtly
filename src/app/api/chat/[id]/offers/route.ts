@@ -24,7 +24,7 @@ export async function POST(
     }
 
     const body = await req.json();
-    const { amount, message } = body;
+    const { amount } = body;
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return new NextResponse('Valid amount is required', { status: 400 });
@@ -71,8 +71,7 @@ export async function POST(
         chatId: params.id,
         senderId: session.user.id,
         receiverId,
-        amount,
-        message: message?.trim() || null
+        amount
       },
       include: {
         sender: {

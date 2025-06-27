@@ -15,9 +15,7 @@ import {
   Alert,
   IconButton,
   Divider,
-  Chip,
-  Tabs,
-  Tab
+  Chip
 } from '@mui/material';
 import { 
   Send as SendIcon, 
@@ -100,7 +98,6 @@ export default function ChatDetailPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tabValue, setTabValue] = useState(0);
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,9 +113,7 @@ export default function ChatDetailPage() {
     fetchChatData();
   }, [session, status, router, chatId]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Removed auto-scroll to prevent constant force scrolling
 
   useEffect(() => {
     if (chatId) {
@@ -254,9 +249,7 @@ export default function ChatDetailPage() {
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+
 
   if (status === 'loading' || loading) {
     return (
@@ -335,38 +328,33 @@ export default function ChatDetailPage() {
         </Alert>
       )}
 
-      {/* Chat Tabs */}
+      {/* Chat */}
       <Paper sx={{ height: 600, display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="Messages" />
-            <Tab label={`Offers (${offers.length})`} />
-          </Tabs>
-        </Box>
-
-        {/* Tab Content */}
-        {tabValue === 0 && (
-          <>
-            {/* Messages */}
-            <Box sx={{ 
-              flex: 1, 
-              overflowY: 'auto', 
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1
-            }}>
-              {messages.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
-                  Start a conversation with {otherUser?.name || otherUser?.username}
-                </Typography>
-              ) : (
-                messages.map((message) => (
+        {/* Messages and Offers */}
+        <Box sx={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1
+        }}>
+          {messages.length === 0 && offers.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
+              Start a conversation with {otherUser?.name || otherUser?.username}
+            </Typography>
+          ) : (
+            // Combine and sort messages and offers by creation time
+            [...messages.map(msg => ({ ...msg, type: 'message' as const })), 
+             ...offers.map(offer => ({ ...offer, type: 'offer' as const }))]
+              .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+              .map((item) => (
+                item.type === 'message' ? (
                   <Box
-                    key={message.id}
+                    key={`msg-${item.id}`}
                     sx={{
                       display: 'flex',
-                      justifyContent: message.sender.id === session.user.id ? 'flex-end' : 'flex-start',
+                      justifyContent: item.sender.id === session.user.id ? 'flex-end' : 'flex-start',
                       mb: 1
                     }}
                   >
@@ -375,13 +363,13 @@ export default function ChatDetailPage() {
                         maxWidth: '70%',
                         p: 1.5,
                         borderRadius: 2,
-                        bgcolor: message.sender.id === session.user.id ? 'primary.main' : 'grey.100',
-                        color: message.sender.id === session.user.id ? 'white' : 'text.primary',
+                        bgcolor: item.sender.id === session.user.id ? 'primary.main' : 'grey.100',
+                        color: item.sender.id === session.user.id ? 'white' : 'text.primary',
                         wordBreak: 'break-word'
                       }}
                     >
                       <Typography variant="body2">
-                        {message.content}
+                        {'content' in item ? item.content : ''}
                       </Typography>
                       <Typography 
                         variant="caption" 
@@ -391,89 +379,60 @@ export default function ChatDetailPage() {
                           mt: 0.5
                         }}
                       >
-                        {formatTime(message.createdAt)}
+                        {formatTime(item.createdAt)}
                       </Typography>
                     </Box>
                   </Box>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </Box>
+                ) : (
+                  <Box key={`offer-${item.id}`} sx={{ mb: 2 }}>
+                    <OfferCard
+                      offer={item as Offer}
+                      currentUserId={session.user.id}
+                      onOfferUpdated={handleOfferUpdated}
+                    />
+                  </Box>
+                )
+              ))
+          )}
+          <div ref={messagesEndRef} />
+        </Box>
 
-            {/* Message Input */}
-            <Divider />
-            <Box sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => setOfferDialogOpen(true)}
-                  startIcon={<OfferIcon />}
-                  sx={{ minWidth: 'auto', px: 2 }}
-                >
-                  Make Offer
-                </Button>
-                <TextField
-                  fullWidth
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  disabled={sending}
-                  multiline
-                  maxRows={3}
-                  size="small"
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || sending}
-                  sx={{ minWidth: 'auto', px: 2 }}
-                >
-                  {sending ? <CircularProgress size={20} /> : <SendIcon />}
-                </Button>
-              </Box>
-            </Box>
-          </>
-        )}
-
-        {tabValue === 1 && (
-          <>
-            {/* Offers */}
-            <Box sx={{ 
-              flex: 1, 
-              overflowY: 'auto', 
-              p: 2
-            }}>
-              {offers.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
-                  No offers yet. Be the first to make an offer!
-                </Typography>
-              ) : (
-                offers.map((offer) => (
-                  <OfferCard
-                    key={offer.id}
-                    offer={offer}
-                    currentUserId={session.user.id}
-                    onOfferUpdated={handleOfferUpdated}
-                  />
-                ))
-              )}
-            </Box>
-
-            {/* Offer Button */}
-            <Divider />
-            <Box sx={{ p: 2 }}>
+        {/* Message Input */}
+        <Divider />
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {/* Only show Make Offer button for buyers */}
+            {chat && chat.buyer.id === session.user.id && (
               <Button
-                variant="contained"
+                variant="outlined"
                 onClick={() => setOfferDialogOpen(true)}
                 startIcon={<OfferIcon />}
-                fullWidth
+                sx={{ minWidth: 'auto', px: 2 }}
               >
-                Make New Offer
+                Make Offer
               </Button>
-            </Box>
-          </>
-        )}
+            )}
+            <TextField
+              fullWidth
+              placeholder="Type your message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={sending}
+              multiline
+              maxRows={3}
+              size="small"
+            />
+            <Button
+              variant="contained"
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim() || sending}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              {sending ? <CircularProgress size={20} /> : <SendIcon />}
+            </Button>
+          </Box>
+        </Box>
       </Paper>
 
       {/* Offer Dialog */}

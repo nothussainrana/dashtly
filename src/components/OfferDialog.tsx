@@ -33,7 +33,6 @@ export default function OfferDialog({
   onOfferCreated
 }: OfferDialogProps) {
   const [amount, setAmount] = useState('');
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,8 +52,7 @@ export default function OfferDialog({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: numAmount,
-          message: message.trim() || null
+          amount: numAmount
         })
       });
 
@@ -74,7 +72,6 @@ export default function OfferDialog({
 
   const handleClose = () => {
     setAmount('');
-    setMessage('');
     setError(null);
     onClose();
   };
@@ -116,18 +113,6 @@ export default function OfferDialog({
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
           }}
           placeholder="0.00"
-          sx={{ mb: 2 }}
-          disabled={loading}
-        />
-
-        <TextField
-          fullWidth
-          label="Message (Optional)"
-          multiline
-          rows={3}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Add a note with your offer..."
           disabled={loading}
         />
       </DialogContent>
