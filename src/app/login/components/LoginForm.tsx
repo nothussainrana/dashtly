@@ -128,6 +128,12 @@ export default function LoginForm() {
       </Button>
 
       <Box sx={{ textAlign: "center", mt: 2 }}>
+        <Link href="/forgot-password" style={{ textDecoration: "none", fontSize: "0.875rem" }}>
+          Forgot your password?
+        </Link>
+      </Box>
+
+      <Box sx={{ textAlign: "center", mt: 1 }}>
         <Link href="/register" style={{ textDecoration: "none" }}>
           Don't have an account? Sign up
         </Link>

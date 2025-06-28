@@ -15,6 +15,8 @@ model User {
   emailVerified         DateTime?
   emailVerificationCode String?
   emailVerificationExpiry DateTime?
+  passwordResetToken    String?
+  passwordResetExpiry   DateTime?
   image                 String?
   hashedPassword        String?
   createdAt             DateTime  @default(now())
