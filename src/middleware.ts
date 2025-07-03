@@ -19,8 +19,10 @@ export const config = {
      * - register (registration page)
      * - verify-email (email verification page)
      * - resend-verification (resend verification page)
+     * - forgot-password (forgot password page)
+     * - reset-password (reset password page)
      * - root path (homepage)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|verify-email|resend-verification|$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|verify-email|resend-verification|forgot-password|reset-password|$).*)",
   ],
 }; 
