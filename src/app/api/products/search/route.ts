@@ -105,7 +105,6 @@ export async function GET(req: Request) {
         price: true,
         description: true,
         status: true,
-        soldCount: true,
         createdAt: true,
         updatedAt: true,
         images: {
