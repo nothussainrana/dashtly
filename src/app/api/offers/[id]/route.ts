@@ -93,7 +93,7 @@ export async function PATCH(
       }
     });
 
-    // If offer was accepted, cancel all other pending offers in the same chat
+    // If offer was accepted, cancel all other pending offers in the same chat and increment sold count
     if (status === 'ACCEPTED') {
       await prisma.offer.updateMany({
         where: {
@@ -104,6 +104,16 @@ export async function PATCH(
         data: {
           status: 'CANCELLED',
           updatedAt: new Date()
+        }
+      });
+
+      // Increment the product's sold count
+      await prisma.product.update({
+        where: { id: offer.chat.productId },
+        data: {
+          soldCount: {
+            increment: 1
+          }
         }
       });
     }

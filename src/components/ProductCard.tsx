@@ -43,6 +43,7 @@ interface ProductCardProps {
     price: number;
     description: string;
     status: string;
+    soldCount?: number;
     images?: ProductImage[];
     category?: Category;
     user?: User;
@@ -158,21 +159,37 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
           ${product.price.toFixed(2)}
         </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            display: 'inline-block',
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            bgcolor: statusColors.bg,
-            color: statusColors.color,
-            textTransform: 'capitalize',
-            mt: 1
-          }}
-        >
-          {product.status}
-        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              display: 'inline-block',
+              px: 1,
+              py: 0.5,
+              borderRadius: 1,
+              bgcolor: statusColors.bg,
+              color: statusColors.color,
+              textTransform: 'capitalize'
+            }}
+          >
+            {product.status}
+          </Typography>
+          {product.soldCount !== undefined && (
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                display: 'inline-block',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: 'grey.100',
+                color: 'text.secondary'
+              }}
+            >
+              {product.soldCount} sold
+            </Typography>
+          )}
+        </Box>
 
         {/* Seller Rating */}
         {product.user && (

@@ -21,6 +21,7 @@ interface Product {
   price: number;
   description: string;
   status: string;
+  soldCount: number;
   createdAt: string;
   images: {
     id: string;
@@ -171,19 +172,28 @@ export default function ProductPage() {
               ${product.price.toFixed(2)}
             </Typography>
 
-            <Chip 
-              label={product.status}
-              sx={{ 
-                mb: 3,
-                bgcolor: product.status === 'active' ? 'success.light' : 
-                        product.status === 'sold' ? 'error.light' : 
-                        'warning.light',
-                color: product.status === 'active' ? 'success.dark' : 
-                       product.status === 'sold' ? 'error.dark' : 
-                       'warning.dark',
-                textTransform: 'capitalize'
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+              <Chip 
+                label={product.status}
+                sx={{ 
+                  bgcolor: product.status === 'active' ? 'success.light' : 
+                          product.status === 'sold' ? 'error.light' : 
+                          'warning.light',
+                  color: product.status === 'active' ? 'success.dark' : 
+                         product.status === 'sold' ? 'error.dark' : 
+                         'warning.dark',
+                  textTransform: 'capitalize'
+                }}
+              />
+              <Chip 
+                label={`${product.soldCount} sold`}
+                variant="outlined"
+                sx={{ 
+                  bgcolor: 'grey.50',
+                  color: 'text.secondary'
+                }}
+              />
+            </Box>
 
             <Typography variant="body1" paragraph>
               {product.description}

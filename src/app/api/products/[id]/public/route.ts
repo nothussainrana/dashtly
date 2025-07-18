@@ -21,7 +21,15 @@ export async function GET(
         id: params.id,
         status: 'active', // Only show active products publicly
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        description: true,
+        status: true,
+        soldCount: true,
+        createdAt: true,
+        updatedAt: true,
         images: {
           orderBy: {
             order: 'asc'
@@ -35,7 +43,7 @@ export async function GET(
             image: true,
           }
         }
-      } as Prisma.ProductInclude
+      }
     });
 
     if (!product) {

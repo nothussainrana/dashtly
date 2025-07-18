@@ -100,7 +100,15 @@ export async function GET(req: Request) {
     // Get products with pagination
     const products = await prisma.product.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        description: true,
+        status: true,
+        soldCount: true,
+        createdAt: true,
+        updatedAt: true,
         images: {
           orderBy: {
             order: 'asc',
