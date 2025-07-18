@@ -30,6 +30,8 @@ model User {
   sellerChats           Chat[]    @relation("ChatSeller")
   sentOffers            Offer[]   @relation("OfferSender")
   receivedOffers        Offer[]   @relation("OfferReceiver")
+  reviewsGiven          Review[]  @relation("ReviewAuthor")
+  reviewsReceived       Review[]  @relation("ReviewSeller")
 }
 
 model Account {
@@ -157,6 +159,7 @@ model Offer {
   message     String?     @db.Text
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  review      Review?     // Optional review for this offer
 
   @@index([chatId])
   @@index([senderId])
@@ -168,4 +171,22 @@ enum OfferStatus {
   ACCEPTED
   REJECTED
   CANCELLED
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  comment   String?  @db.Text
+  authorId  String   // The reviewer (buyer)
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  sellerId  String   // The seller being reviewed
+  seller    User     @relation("ReviewSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  offerId   String   @unique // The accepted offer that allows this review
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sellerId])
+  @@index([authorId])
+  @@index([offerId])
 } 

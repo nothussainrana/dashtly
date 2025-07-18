@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia, Divider } from '@mui/material';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
+import ReviewSummary from '@/components/ReviewSummary';
+import ReviewList from '@/components/ReviewList';
 
 interface User {
   id: string;
@@ -33,6 +35,9 @@ export default function UserProfilePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsRefreshTrigger, setReviewsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (!params.id) return;
@@ -46,6 +51,8 @@ export default function UserProfilePage() {
         setUser(userData);
         setProducts(productsData.products || []);
         setLoading(false);
+        // Fetch review stats
+        fetchReviewStats(params.id as string);
       })
       .catch(err => {
         console.error('Error fetching user data:', err);
@@ -53,6 +60,21 @@ export default function UserProfilePage() {
         setLoading(false);
       });
   }, [params.id]);
+
+  const fetchReviewStats = async (sellerId: string) => {
+    setReviewsLoading(true);
+    try {
+      const response = await fetch(`/api/reviews?sellerId=${sellerId}&limit=1`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviewStats(data.stats);
+      }
+    } catch (err) {
+      console.error('Error fetching review stats:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -98,6 +120,25 @@ export default function UserProfilePage() {
             <Typography variant="body2" color="text.secondary">
               Member since {new Date().toLocaleDateString()}
             </Typography>
+            
+            {/* Seller Rating */}
+            <Box sx={{ mt: 2 }}>
+              {reviewsLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2" color="text.secondary">
+                    Loading ratings...
+                  </Typography>
+                </Box>
+              ) : (
+                <ReviewSummary
+                  averageRating={reviewStats.averageRating}
+                  totalReviews={reviewStats.totalReviews}
+                  showLabel={true}
+                  size="medium"
+                />
+              )}
+            </Box>
           </Box>
         </Box>
       </Paper>
@@ -131,6 +172,14 @@ export default function UserProfilePage() {
           </Box>
         )}
       </Box>
+
+      {/* Reviews Section */}
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <ReviewList 
+          sellerId={user.id} 
+          refreshTrigger={reviewsRefreshTrigger}
+        />
+      </Paper>
     </Container>
   );
 } 

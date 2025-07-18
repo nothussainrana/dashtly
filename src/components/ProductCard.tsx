@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
-import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, Typography, Box, Chip, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Image from 'next/image';
+import ReviewSummary from './ReviewSummary';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -28,6 +29,13 @@ interface Category {
   name: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image?: string | null;
+}
+
 interface ProductCardProps {
   product: {
     id: string;
@@ -37,11 +45,37 @@ interface ProductCardProps {
     status: string;
     images?: ProductImage[];
     category?: Category;
+    user?: User;
   };
   onClick?: () => void;
 }
 
 export default function ProductCard({ product, onClick }: ProductCardProps) {
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  useEffect(() => {
+    if (product.user?.id) {
+      fetchReviewStats(product.user.id);
+    } else {
+      setReviewsLoading(false);
+    }
+  }, [product.user?.id]);
+
+  const fetchReviewStats = async (sellerId: string) => {
+    try {
+      const response = await fetch(`/api/reviews?sellerId=${sellerId}&limit=1`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviewStats(data.stats);
+      }
+    } catch (err) {
+      console.error('Error fetching review stats:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -139,6 +173,27 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         >
           {product.status}
         </Typography>
+
+        {/* Seller Rating */}
+        {product.user && (
+          <Box sx={{ mt: 2 }}>
+            {reviewsLoading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={12} />
+                <Typography variant="caption" color="text.secondary">
+                  Loading...
+                </Typography>
+              </Box>
+            ) : (
+              <ReviewSummary
+                averageRating={reviewStats.averageRating}
+                totalReviews={reviewStats.totalReviews}
+                showLabel={false}
+                size="small"
+              />
+            )}
+          </Box>
+        )}
       </CardContent>
     </StyledCard>
   );

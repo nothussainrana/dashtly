@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -15,8 +15,10 @@ import {
 import { 
   Check as CheckIcon, 
   Close as CloseIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  RateReview as ReviewIcon
 } from '@mui/icons-material';
+import ReviewForm from './ReviewForm';
 
 interface Offer {
   id: string;
@@ -36,6 +38,18 @@ interface Offer {
     username: string;
     image: string | null;
   };
+  chat?: {
+    product: {
+      id: string;
+      name: string;
+    };
+    seller: {
+      id: string;
+      name: string;
+      username: string;
+      image: string | null;
+    };
+  };
 }
 
 interface OfferCardProps {
@@ -47,9 +61,35 @@ interface OfferCardProps {
 export default function OfferCard({ offer, currentUserId, onOfferUpdated }: OfferCardProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [hasReview, setHasReview] = useState(false);
+  const [checkingReview, setCheckingReview] = useState(false);
 
   const isReceiver = offer.receiver.id === currentUserId;
   const isSender = offer.sender.id === currentUserId;
+
+  // Check if this offer has a review
+  useEffect(() => {
+    if (offer.status === 'ACCEPTED' && isSender) {
+      checkForExistingReview();
+    }
+  }, [offer.id, offer.status, isSender]);
+
+  const checkForExistingReview = async () => {
+    setCheckingReview(true);
+    try {
+      const response = await fetch(`/api/reviews?sellerId=${offer.receiver.id}&limit=100`);
+      if (response.ok) {
+        const data = await response.json();
+        const existingReview = data.reviews.find((review: any) => review.offerId === offer.id);
+        setHasReview(!!existingReview);
+      }
+    } catch (err) {
+      console.error('Error checking for existing review:', err);
+    } finally {
+      setCheckingReview(false);
+    }
+  };
 
   const handleUpdateOffer = async (status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED') => {
     setLoading(true);
@@ -117,8 +157,9 @@ export default function OfferCard({ offer, currentUserId, onOfferUpdated }: Offe
   };
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
+    <>
+      <Card sx={{ mb: 2 }}>
+        <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar src={offer.sender.image || undefined} sx={{ mr: 1, width: 32, height: 32 }}>
             {offer.sender.name?.charAt(0) || offer.sender.username.charAt(0)}
@@ -194,7 +235,58 @@ export default function OfferCard({ offer, currentUserId, onOfferUpdated }: Offe
             )}
           </Box>
         )}
+
+        {/* Review Button for Accepted Offers */}
+        {offer.status === 'ACCEPTED' && isSender && !hasReview && !checkingReview && (
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<ReviewIcon />}
+              onClick={() => setReviewFormOpen(true)}
+              fullWidth
+            >
+              Leave Review
+            </Button>
+          </Box>
+        )}
+
+        {offer.status === 'ACCEPTED' && isSender && hasReview && (
+          <Box sx={{ mt: 2 }}>
+            <Chip
+              label="Review Submitted"
+              color="success"
+              size="small"
+              variant="outlined"
+            />
+          </Box>
+        )}
+
+        {checkingReview && (
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <CircularProgress size={16} />
+          </Box>
+        )}
       </CardContent>
     </Card>
+    
+    {/* Review Form */}
+    {offer.chat && (
+      <ReviewForm
+        open={reviewFormOpen}
+        onClose={() => setReviewFormOpen(false)}
+        offerId={offer.id}
+        productName={offer.chat?.product.name || ''}
+        sellerName={offer.chat?.seller.name || ''}
+        sellerUsername={offer.chat?.seller.username || ''}
+        sellerImage={offer.chat?.seller.image}
+        onReviewSubmitted={() => {
+          setHasReview(true);
+          onOfferUpdated();
+        }}
+      />
+    )}
+    </>
   );
 } 

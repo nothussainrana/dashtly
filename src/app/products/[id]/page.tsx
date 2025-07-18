@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link } from '@mui/material';
+import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link, Divider } from '@mui/material';
 import Image from 'next/image';
 import ChatButton from '@/components/ChatButton';
+import ReviewSummary from '@/components/ReviewSummary';
+import ReviewList from '@/components/ReviewList';
 
 interface User {
   id: string;
@@ -33,6 +35,8 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
     if (!params.id) return;
@@ -55,8 +59,24 @@ export default function ProductPage() {
   useEffect(() => {
     if (product) {
       console.log('Current product state:', product);
+      fetchReviewStats(product.user.id);
     }
   }, [product]);
+
+  const fetchReviewStats = async (sellerId: string) => {
+    setReviewsLoading(true);
+    try {
+      const response = await fetch(`/api/reviews?sellerId=${sellerId}&limit=1`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviewStats(data.stats);
+      }
+    } catch (err) {
+      console.error('Error fetching review stats:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -202,13 +222,32 @@ export default function ProductPage() {
                     {product.user.name || product.user.username}
                   </Typography>
                   {product.user.name && (
-                    <Typography variant="body2" color="text.secondary">
-                      @{product.user.username}
-                    </Typography>
-                  )}
+                                      <Typography variant="body2" color="text.secondary">
+                    @{product.user.username}
+                  </Typography>
+                )}
+              </Box>
+            </Link>
+            
+            {/* Seller Rating */}
+            <Box sx={{ mt: 2 }}>
+              {reviewsLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2" color="text.secondary">
+                    Loading ratings...
+                  </Typography>
                 </Box>
-              </Link>
+              ) : (
+                <ReviewSummary
+                  averageRating={reviewStats.averageRating}
+                  totalReviews={reviewStats.totalReviews}
+                  showLabel={true}
+                  size="small"
+                />
+              )}
             </Box>
+          </Box>
 
             {/* Chat Button */}
             <ChatButton
@@ -223,6 +262,11 @@ export default function ProductPage() {
             </Typography>
           </Box>
         </Box>
+      </Paper>
+
+      {/* Reviews Section */}
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+        <ReviewList sellerId={product.user.id} />
       </Paper>
     </Container>
   );
