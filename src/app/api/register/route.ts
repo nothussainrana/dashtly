@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     // Password complexity: at least 6 chars, one number, one lowercase, one uppercase
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(password)) {
       return new NextResponse("Password must be at least 6 characters and include a number, a lowercase letter, and an uppercase letter", { status: 400 });
     }

@@ -21,8 +21,8 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const validatePassword = (password: string) => {
-    // At least 6 chars, one number, one lowercase, one uppercase, one letter
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password);
+    // At least 6 chars, one number, one lowercase, one uppercase, any characters allowed
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(password);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
