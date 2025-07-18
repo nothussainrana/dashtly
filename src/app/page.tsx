@@ -1,8 +1,9 @@
 'use client';
 
-import { Box, Button, Container, Typography, Paper } from '@mui/material';
+import { Box, Button, Container, Typography, Paper, Card, CardContent, CardActionArea } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const HeroSection = styled(Paper)(({ theme }) => ({
   position: 'relative',
@@ -27,7 +28,36 @@ const HeroContent = styled(Box)(({ theme }) => ({
   },
 }));
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export default function Home() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        } else {
+          console.error('Failed to fetch categories');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HeroSection>
@@ -137,6 +167,75 @@ export default function Home() {
             </Paper>
           ))}
         </Box>
+      </Container>
+
+      {/* Categories Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Browse by Category
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Find exactly what you're looking for by browsing our categories
+          </Typography>
+        </Box>
+        
+        {loadingCategories ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <Typography variant="body1" color="text.secondary">
+              Loading categories...
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)'
+            }, 
+            gap: 3
+          }}>
+            {categories.map((category) => (
+              <Card
+                key={category.id}
+                sx={{
+                  height: '100%',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: (theme) => theme.shadows[4],
+                  },
+                }}
+              >
+                <CardActionArea
+                  component={Link}
+                  href={`/search?categoryId=${category.id}`}
+                  sx={{ height: '100%' }}
+                >
+                  <CardContent sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    p: 3
+                  }}>
+                    <Typography variant="h6" component="h3" gutterBottom>
+                      {category.name}
+                    </Typography>
+                    {category.description && (
+                      <Typography variant="body2" color="text.secondary">
+                        {category.description}
+                      </Typography>
+                    )}
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
+          </Box>
+        )}
       </Container>
     </Box>
   );

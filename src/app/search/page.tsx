@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Container, Typography, Box, Button, Pagination, CircularProgress, Alert, Paper, FormControl, InputLabel, Select, MenuItem, Slider } from '@mui/material';
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/ProductCard';
@@ -23,6 +23,16 @@ interface Product {
     name: string;
     username: string;
   };
+  category?: {
+    id: string;
+    name: string;
+  };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
 }
 
 interface SearchResponse {
@@ -38,11 +48,15 @@ interface SearchResponse {
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialQuery = searchParams.get('q') || '';
+  const initialCategoryId = searchParams.get('categoryId') || '';
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -52,13 +66,47 @@ export default function SearchPage() {
   });
 
   // Filter states
+  const [categoryId, setCategoryId] = useState(initialCategoryId);
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
-  const performSearch = async (page: number = 1) => {
+  const updateURL = (newFilters: { query?: string; categoryId?: string; minPrice?: number | null; maxPrice?: number | null; sortBy?: string; sortOrder?: string; page?: number }) => {
+    const params = new URLSearchParams();
+    
+    if (newFilters.query || initialQuery) {
+      params.append('q', newFilters.query || initialQuery);
+    }
+    if (newFilters.categoryId || categoryId) {
+      params.append('categoryId', newFilters.categoryId || categoryId);
+    }
+    if (newFilters.minPrice !== undefined && newFilters.minPrice !== null) {
+      params.append('minPrice', newFilters.minPrice.toString());
+    } else if (minPrice !== null) {
+      params.append('minPrice', minPrice.toString());
+    }
+    if (newFilters.maxPrice !== undefined && newFilters.maxPrice !== null) {
+      params.append('maxPrice', newFilters.maxPrice.toString());
+    } else if (maxPrice !== null) {
+      params.append('maxPrice', maxPrice.toString());
+    }
+    if (newFilters.sortBy || sortBy !== 'createdAt') {
+      params.append('sortBy', newFilters.sortBy || sortBy);
+    }
+    if (newFilters.sortOrder || sortOrder !== 'desc') {
+      params.append('sortOrder', newFilters.sortOrder || sortOrder);
+    }
+    if (newFilters.page && newFilters.page !== 1) {
+      params.append('page', newFilters.page.toString());
+    }
+
+    const newURL = `/search${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(newURL);
+  };
+
+  const performSearch = async (page: number = 1, updateUrl: boolean = true) => {
     setLoading(true);
     setError(null);
 
@@ -71,11 +119,19 @@ export default function SearchPage() {
         sortOrder,
       });
 
+      if (categoryId) {
+        params.append('categoryId', categoryId);
+      }
       if (minPrice !== null) {
         params.append('minPrice', minPrice.toString());
       }
       if (maxPrice !== null) {
         params.append('maxPrice', maxPrice.toString());
+      }
+
+      // Update URL with current filters
+      if (updateUrl) {
+        updateURL({ page: page !== 1 ? page : undefined });
       }
 
       const response = await fetch(`/api/search?${params}`);
@@ -94,7 +150,16 @@ export default function SearchPage() {
     }
   };
 
-  const handleFilterChange = () => {
+  const handleCategoryChange = (newCategoryId: string) => {
+    setCategoryId(newCategoryId);
+    performSearch(1);
+  };
+
+  const handleSortChange = (newSortBy: string, newSortOrder?: string) => {
+    setSortBy(newSortBy);
+    if (newSortOrder) {
+      setSortOrder(newSortOrder);
+    }
     performSearch(1);
   };
 
@@ -110,16 +175,37 @@ export default function SearchPage() {
     performSearch(page);
   };
 
+  // Fetch categories on component mount
   useEffect(() => {
-    if (initialQuery) {
-      performSearch();
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        } else {
+          console.error('Failed to fetch categories');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (initialQuery || initialCategoryId) {
+      performSearch(1, false); // Don't update URL on initial load
     } else {
       setLoading(false);
     }
-  }, [initialQuery]);
+  }, [initialQuery, initialCategoryId]);
 
   useEffect(() => {
-    if (initialQuery) {
+    if (initialQuery || initialCategoryId) {
       performSearch(1);
     }
   }, [sortBy, sortOrder]);
@@ -130,13 +216,19 @@ export default function SearchPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           Search Results
         </Typography>
-        {initialQuery && (
+        {(initialQuery || categoryId) && (
           <Typography variant="body1" color="text.secondary">
-            Showing results for "{initialQuery}"
+            {initialQuery && categoryId ? (
+              <>Showing results for "{initialQuery}" in {categories.find(c => c.id === categoryId)?.name || 'category'}</>
+            ) : initialQuery ? (
+              <>Showing results for "{initialQuery}"</>
+            ) : (
+              <>Showing results in {categories.find(c => c.id === categoryId)?.name || 'category'}</>
+            )}
           </Typography>
         )}
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Search by product name, description, or seller username
+          Search by product name, description, seller username, or browse by category
         </Typography>
       </Box>
 
@@ -147,11 +239,28 @@ export default function SearchPage() {
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
           <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={categoryId}
+              label="Category"
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              disabled={loadingCategories}
+            >
+              <MenuItem value="">All Categories</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Sort By</InputLabel>
             <Select
               value={sortBy}
               label="Sort By"
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => handleSortChange(e.target.value)}
             >
               <MenuItem value="createdAt">Date Created</MenuItem>
               <MenuItem value="updatedAt">Date Updated</MenuItem>
@@ -165,7 +274,7 @@ export default function SearchPage() {
             <Select
               value={sortOrder}
               label="Order"
-              onChange={(e) => setSortOrder(e.target.value)}
+              onChange={(e) => handleSortChange(sortBy, e.target.value)}
             >
               <MenuItem value="asc">Ascending</MenuItem>
               <MenuItem value="desc">Descending</MenuItem>
