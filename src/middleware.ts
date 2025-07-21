@@ -6,23 +6,26 @@ export default withAuth({
   },
 });
 
+// Routes that should be excluded from authentication middleware
+const PUBLIC_ROUTES = [
+  'api',
+  '_next/static',
+  '_next/image',
+  'favicon.ico',
+  'sitemap.xml',
+  'robots.txt',
+  'public',
+  'login',
+  'register',
+  'verify-email',
+  'resend-verification',
+  'forgot-password',
+  'reset-password',
+  '$', // root path
+];
+
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - login (login page)
-     * - register (registration page)
-     * - verify-email (email verification page)
-     * - resend-verification (resend verification page)
-     * - forgot-password (forgot password page)
-     * - reset-password (reset password page)
-     * - root path (homepage)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico|public|login|register|verify-email|resend-verification|forgot-password|reset-password|$).*)",
+    `/((?!${PUBLIC_ROUTES.join('|')}).*)`,
   ],
 }; 
