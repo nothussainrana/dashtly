@@ -21,11 +21,11 @@ const PUBLIC_ROUTES = [
   'resend-verification',
   'forgot-password',
   'reset-password',
-  '$', // root path
 ];
 
 export const config = {
   matcher: [
-    `/((?!${PUBLIC_ROUTES.join('|')}).*)`,
+    // Apply middleware to all routes except public routes and the root path
+    `/((?!${PUBLIC_ROUTES.join('|')}|$).*)`,
   ],
 }; 
