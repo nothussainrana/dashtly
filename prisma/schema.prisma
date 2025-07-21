@@ -19,6 +19,7 @@ model User {
   passwordResetExpiry   DateTime?
   image                 String?
   hashedPassword        String?
+  role                  UserRole  @default(REGULAR)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   accounts              Account[]
@@ -190,4 +191,10 @@ model Review {
   @@index([sellerId])
   @@index([authorId])
   @@index([offerId])
-} 
+}
+
+enum UserRole {
+  REGULAR
+  PRO
+  ADMIN
+}

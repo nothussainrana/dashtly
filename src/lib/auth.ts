@@ -10,7 +10,14 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string;
+      role: string;
     }
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role: string;
   }
 }
 
@@ -69,6 +76,13 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        
+        // Fetch user role from database
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true }
+        });
+        token.role = dbUser?.role || 'REGULAR';
       }
       return token;
     },
@@ -77,6 +91,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
+        session.user.role = token.role as string;
       }
       return session;
     }
