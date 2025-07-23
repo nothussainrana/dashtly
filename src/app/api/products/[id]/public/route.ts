@@ -41,6 +41,7 @@ export async function GET(
             name: true,
             username: true,
             image: true,
+            role: true,
           }
         }
       }

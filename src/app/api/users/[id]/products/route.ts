@@ -34,6 +34,14 @@ export async function GET(
           orderBy: {
             order: 'asc'
           }
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            role: true,
+          }
         }
       },
       orderBy: {

@@ -18,6 +18,12 @@ interface Product {
     url: string;
     order: number;
   }>;
+  user?: {
+    id: string;
+    name: string;
+    username: string;
+    role?: string;
+  };
 }
 
 export default function ProductsPage() {

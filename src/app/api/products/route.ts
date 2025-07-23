@@ -135,6 +135,14 @@ export async function GET(req: Request) {
           orderBy: {
             order: 'asc'
           }
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            role: true,
+          }
         }
       },
       orderBy: { createdAt: 'desc' },

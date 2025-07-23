@@ -17,10 +17,12 @@ import {
   ListItemAvatar,
   Avatar,
   Divider,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Clear as ClearIcon,
+  VerifiedUser as VerifiedIcon,
 } from '@mui/icons-material';
 import { debounce } from 'lodash';
 import Image from 'next/image';
@@ -39,6 +41,7 @@ interface SearchProduct {
     id: string;
     name: string;
     username: string;
+    role?: string;
   };
 }
 
@@ -231,7 +234,31 @@ export default function HeaderSearch() {
                           )}
                         </ListItemAvatar>
                         <ListItemText
-                          primary={product.name}
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {product.name}
+                              </Typography>
+                              {product.user.role === 'ADMIN' && (
+                                <Chip
+                                  icon={<VerifiedIcon />}
+                                  label="CERTIFIED"
+                                  size="small"
+                                  sx={{
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.6rem',
+                                    height: '20px',
+                                    '& .MuiChip-icon': {
+                                      color: 'white',
+                                      fontSize: '0.7rem'
+                                    }
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          }
                           secondary={
                             <Box>
                               <Typography variant="body2" color="text.secondary">
@@ -242,10 +269,6 @@ export default function HeaderSearch() {
                               </Typography>
                             </Box>
                           }
-                          primaryTypographyProps={{
-                            variant: 'body2',
-                            sx: { fontWeight: 500 },
-                          }}
                         />
                       </ListItemButton>
                     </ListItem>

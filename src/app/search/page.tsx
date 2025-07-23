@@ -22,6 +22,7 @@ interface Product {
     id: string;
     name: string;
     username: string;
+    role?: string;
   };
   category?: {
     id: string;

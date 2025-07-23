@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link, Divider } from '@mui/material';
+import { VerifiedUser as VerifiedIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import ChatButton from '@/components/ChatButton';
 import ReviewSummary from '@/components/ReviewSummary';
@@ -13,6 +14,7 @@ interface User {
   name: string;
   username: string;
   image: string | null;
+  role?: string;
 }
 
 interface Product {
@@ -164,9 +166,30 @@ export default function ProductPage() {
 
           {/* Product Details */}
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              {product.name}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 0, flex: 1 }}>
+                {product.name}
+              </Typography>
+              {/* CERTIFIED Badge for Admin Users */}
+              {product.user.role === 'ADMIN' && (
+                <Chip
+                  icon={<VerifiedIcon />}
+                  label="CERTIFIED"
+                  sx={{
+                    ml: 2,
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    height: '36px',
+                    '& .MuiChip-icon': {
+                      color: 'white',
+                      fontSize: '1.1rem'
+                    }
+                  }}
+                />
+              )}
+            </Box>
             
             <Typography variant="h5" color="primary" sx={{ mb: 2 }}>
               ${product.price.toFixed(2)}

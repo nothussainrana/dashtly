@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { sendVerificationEmail, generateVerificationCode, getVerificationCodeExpiry } from "@/lib/email";
 
 const prisma = new PrismaClient();
@@ -52,6 +52,12 @@ export async function POST(request: Request) {
     const verificationCode = generateVerificationCode();
     const verificationExpiry = getVerificationCodeExpiry();
 
+    // Check if this email should have admin role
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const userRole = adminEmail && email.toLowerCase() === adminEmail.toLowerCase() 
+      ? UserRole.ADMIN 
+      : UserRole.REGULAR;
+
     // Create user with verification code (emailVerified is null until verified)
     const user = await prisma.user.create({
       data: {
@@ -61,9 +67,15 @@ export async function POST(request: Request) {
         hashedPassword,
         emailVerificationCode: verificationCode,
         emailVerificationExpiry: verificationExpiry,
-        emailVerified: null // User is not verified yet
+        emailVerified: null, // User is not verified yet
+        role: userRole
       }
     });
+
+    // Log admin user creation
+    if (userRole === UserRole.ADMIN) {
+      console.log(`[ADMIN_SETUP] Created new admin user during registration: ${email}`);
+    }
 
     // Send verification email
     try {

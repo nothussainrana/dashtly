@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { Providers } from "./providers";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { ensureAdminUser } from "@/lib/admin";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+  
+  // Ensure admin user is set up on app startup
+  await ensureAdminUser();
 
   return (
     <html lang="en">

@@ -18,9 +18,30 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   },
 }));
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  images: Array<{
+    id: string;
+    url: string;
+    order: number;
+  }>;
+  user?: {
+    id: string;
+    name: string;
+    username: string;
+    role?: string;
+  };
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

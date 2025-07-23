@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, Chip, CircularProgress } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, CircularProgress, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { VerifiedUser as VerifiedIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import ReviewSummary from './ReviewSummary';
 
@@ -34,6 +35,7 @@ interface User {
   name: string;
   username: string;
   image?: string | null;
+  role?: string;
 }
 
 interface ProductCardProps {
@@ -129,9 +131,30 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         </Box>
       )}
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          {product.name}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="h6" gutterBottom sx={{ mb: 0, flex: 1 }}>
+            {product.name}
+          </Typography>
+          {/* CERTIFIED Badge for Admin Users */}
+          {product.user?.role === 'ADMIN' && (
+            <Chip
+              icon={<VerifiedIcon />}
+              label="CERTIFIED"
+              size="small"
+              sx={{
+                ml: 1,
+                bgcolor: 'primary.main',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '0.7rem',
+                '& .MuiChip-icon': {
+                  color: 'white',
+                  fontSize: '0.8rem'
+                }
+              }}
+            />
+          )}
+        </Box>
         
         {/* Category Chip */}
         {product.category && (
