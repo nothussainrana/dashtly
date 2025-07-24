@@ -137,10 +137,10 @@ export default function HeaderSearch() {
   };
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', maxWidth: 600 }}>
+    <Box sx={{ position: 'relative', width: '100%' }}>
       <TextField
         id="search-input"
-        placeholder="Search products by name, description, or username..."
+        placeholder="Search products"
         value={query}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}
@@ -153,11 +153,6 @@ export default function HeaderSearch() {
           },
         }}
         InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="action" />
-            </InputAdornment>
-          ),
           endAdornment: (
             <InputAdornment position="end">
               {query && (

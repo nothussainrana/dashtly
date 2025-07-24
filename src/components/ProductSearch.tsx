@@ -169,7 +169,7 @@ export default function ProductSearch({
       <Box sx={{ mb: 2 }}>
         <TextField
           fullWidth
-          placeholder="Search products by name, description, username, or category..."
+          placeholder="Search products"
           value={filters.query}
           onChange={handleQueryChange}
           InputProps={{
