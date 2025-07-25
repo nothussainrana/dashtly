@@ -19,7 +19,7 @@ export async function GET(
     const products = await prisma.product.findMany({
       where: {
         userId: params.id,
-        status: 'active', // Only show active products
+        status: 'ACTIVE', // Only show active products
       },
       select: {
         id: true,

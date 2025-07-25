@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     // Validate and parse the data
-    const { name, price, description, status, categoryId, images } = body;
+    const { name, price, description, status, categoryId, images, variants = [] } = body;
 
     if (!name || typeof name !== 'string') {
       return new NextResponse(
@@ -61,13 +61,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const validStatuses = ['active', 'inactive', 'sold'];
-    if (!status || !validStatuses.includes(status)) {
+    const validStatuses = ['ACTIVE', 'INACTIVE', 'SOLD', 'DRAFT'];
+    const productStatus = status || 'ACTIVE';
+    if (!validStatuses.includes(productStatus)) {
       return new NextResponse(
         JSON.stringify({ error: 'Invalid status' }), 
         { status: 400 }
       );
     }
+
+    // Calculate total stock from variants
+    const totalStock = variants.reduce((total: number, variant: any) => {
+      return total + (variant.stock || 0);
+    }, 0);
 
     try {
       const product = await prisma.product.create({
@@ -75,7 +81,8 @@ export async function POST(req: Request) {
           name: name.trim(),
           price: Number(price),
           description: description.trim(),
-          status,
+          status: productStatus as any,
+          totalStock,
           categoryId,
           userId: session.user.id,
           images: {
@@ -83,11 +90,22 @@ export async function POST(req: Request) {
               url: img.url,
               order: img.order
             }))
+          },
+          variants: {
+            create: variants.map((variant: any) => ({
+              name: variant.name,
+              sku: variant.sku,
+              price: variant.price ? Number(variant.price) : null,
+              stock: variant.stock || 0,
+              attributes: variant.attributes || {},
+              isActive: variant.isActive !== false
+            }))
           }
         },
         include: {
           images: true,
-          category: true
+          category: true,
+          variants: true
         }
       });
       
@@ -129,12 +147,17 @@ export async function GET(req: Request) {
         description: true,
         status: true,
         soldCount: true,
+        totalStock: true,
         createdAt: true,
         updatedAt: true,
         images: {
           orderBy: {
             order: 'asc'
           }
+        },
+        variants: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' }
         },
         user: {
           select: {

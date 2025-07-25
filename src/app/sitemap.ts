@@ -120,7 +120,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fetch active products
     const products = await prisma.product.findMany({
       where: {
-        status: 'active',
+        status: 'ACTIVE',
       },
       select: {
         id: true,
@@ -144,7 +144,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: {
         products: {
           some: {
-            status: 'active',
+            status: 'ACTIVE',
           },
         },
       },

@@ -19,7 +19,7 @@ export async function GET(
     const product = await prisma.product.findUnique({
       where: {
         id: params.id,
-        status: 'active', // Only show active products publicly
+        status: 'ACTIVE', // Only show active products publicly
       },
       select: {
         id: true,
@@ -28,12 +28,17 @@ export async function GET(
         description: true,
         status: true,
         soldCount: true,
+        totalStock: true,
         createdAt: true,
         updatedAt: true,
         images: {
           orderBy: {
             order: 'asc'
           }
+        },
+        variants: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' }
         },
         user: {
           select: {

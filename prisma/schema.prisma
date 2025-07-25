@@ -84,10 +84,11 @@ model Category {
 model Product {
   id          String        @id @default(cuid())
   name        String
-  price       Float
+  price       Float         // Base price (can be overridden by variants)
   description String        @db.Text
-  status      String        @default("active")
+  status      ProductStatus @default(ACTIVE)
   soldCount   Int           @default(0)
+  totalStock  Int           @default(0) // Total available stock across all variants
   categoryId  String?
   category    Category?     @relation(fields: [categoryId], references: [id])
   createdAt   DateTime      @default(now())
@@ -95,10 +96,36 @@ model Product {
   userId      String
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   images      ProductImage[]
+  variants    ProductVariant[]
   chats       Chat[]
 
   @@index([userId])
   @@index([categoryId])
+  @@index([status])
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String   // e.g., "Small - Red", "Large - Blue"
+  sku         String?  // Optional SKU for inventory tracking
+  price       Float?   // If null, uses product base price
+  stock       Int      @default(0)
+  attributes  Json     // Flexible JSON field for size, color, material, etc.
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@unique([productId, sku])
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  SOLD
+  DRAFT
 }
 
 model ProductImage {

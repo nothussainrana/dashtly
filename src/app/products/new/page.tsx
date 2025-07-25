@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Container, Typography, Box, TextField, Button, Paper, Alert, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { useSession } from 'next-auth/react';
 import { MultiImageUpload } from '@/components/MultiImageUpload';
-import { Container, Paper, Typography, Box, TextField, Button, Alert, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 
 interface ImageFile {
   id: string;
@@ -224,18 +225,20 @@ export default function NewProduct() {
             rows={4}
           />
           
-          <TextField
-            select
-            label="Status"
-            name="status"
-            value={formData.status}
-            onChange={handleTextChange}
-            fullWidth
-          >
-            <MenuItem value="active">Active</MenuItem>
-            <MenuItem value="inactive">Inactive</MenuItem>
-            <MenuItem value="sold">Sold</MenuItem>
-          </TextField>
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              name="status"
+              value={formData.status}
+              onChange={handleSelectChange}
+              required
+            >
+              <MenuItem value="ACTIVE">Active</MenuItem>
+              <MenuItem value="INACTIVE">Inactive</MenuItem>
+              <MenuItem value="DRAFT">Draft</MenuItem>
+            </Select>
+          </FormControl>
 
           <Box>
             <Typography variant="subtitle1" gutterBottom>
