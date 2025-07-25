@@ -4,8 +4,8 @@ import "./globals.css";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Providers } from "./providers";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { ensureAdminUser } from "@/lib/admin";
 
 const inter = Inter({ subsets: ["latin"] });
