@@ -1,4 +1,4 @@
-Dashtly is an e-commerce marketplace for users to buy and sell things
+Dashtly is an e-commerce marketplace for users to buy and sell things1
 
 ## Getting Started
 
