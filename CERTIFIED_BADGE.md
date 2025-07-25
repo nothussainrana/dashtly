@@ -51,9 +51,11 @@ The badge is displayed when `product.user.role === 'ADMIN'`
 
 To have products show the CERTIFIED badge, ensure the user uploading the product has admin privileges:
 
-1. Set `ADMIN_EMAIL` in your environment variables
-2. When that user registers or if they already exist, they'll automatically get the `ADMIN` role
+1. Set `ADMIN_EMAIL_1` (through `ADMIN_EMAIL_9`) in your environment variables
+2. When any of those users register or if they already exist, they'll automatically get the `ADMIN` role  
 3. All products they upload will display the CERTIFIED badge
+
+You can configure multiple admin users using `ADMIN_EMAIL_1`, `ADMIN_EMAIL_2`, etc.
 
 ## Example Usage
 
