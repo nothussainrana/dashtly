@@ -25,12 +25,52 @@
 import { UserRole, PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { generateVerificationCode, getVerificationCodeExpiry } from './email';
+import fs from 'fs';
+import path from 'path';
 
 declare global {
   var prisma: PrismaClient | undefined;
+  var adminSetupCompleted: boolean | undefined;
 }
 
-let adminSetupCompleted = false;
+const ADMIN_SETUP_FLAG_FILE = path.join(process.cwd(), '.admin-setup-completed');
+
+/**
+ * Checks if admin setup has been completed in this server instance
+ */
+function hasAdminSetupCompleted(): boolean {
+  // Check in-memory flag first (fastest)
+  if (globalThis.adminSetupCompleted) {
+    return true;
+  }
+  
+  // Check file flag (persists across process restarts in development)
+  try {
+    if (fs.existsSync(ADMIN_SETUP_FLAG_FILE)) {
+      globalThis.adminSetupCompleted = true;
+      return true;
+    }
+  } catch (error) {
+    // If file check fails, continue with setup
+  }
+  
+  return false;
+}
+
+/**
+ * Marks admin setup as completed
+ */
+function markAdminSetupCompleted(): void {
+  globalThis.adminSetupCompleted = true;
+  
+  // Create flag file (for development persistence)
+  try {
+    fs.writeFileSync(ADMIN_SETUP_FLAG_FILE, new Date().toISOString());
+  } catch (error) {
+    // If file creation fails, we still have the in-memory flag
+    console.log('[ADMIN_SETUP] Could not create completion flag file, using in-memory flag only');
+  }
+}
 
 /**
  * Gets all admin emails from environment variables (ADMIN_EMAIL_1 to ADMIN_EMAIL_9)
@@ -110,8 +150,8 @@ async function createAdminUser(prisma: PrismaClient, email: string, password: st
  * have the ADMIN role. This function should be called once during app startup.
  */
 export async function ensureAdminUser(): Promise<void> {
-  // Prevent multiple executions
-  if (adminSetupCompleted) {
+  // Check if already completed in this server instance
+  if (hasAdminSetupCompleted()) {
     return;
   }
 
@@ -121,7 +161,7 @@ export async function ensureAdminUser(): Promise<void> {
   // Skip if no admin emails are configured
   if (adminEmails.length === 0) {
     console.log('[ADMIN_SETUP] No ADMIN_EMAIL_X environment variables set, skipping admin user setup');
-    adminSetupCompleted = true;
+    markAdminSetupCompleted();
     return;
   }
 
@@ -132,7 +172,7 @@ export async function ensureAdminUser(): Promise<void> {
   }
 
   try {
-    console.log(`[ADMIN_SETUP] Checking admin user setup for ${adminEmails.length} admin email(s)${isLocal ? ' (localhost detected)' : ''}`);
+    console.log(`[ADMIN_SETUP] 🚀 Running admin user setup for ${adminEmails.length} admin email(s)${isLocal ? ' (localhost detected)' : ''}`);
     
     // Process each admin email
     for (const adminConfig of adminEmails) {
@@ -181,17 +221,27 @@ export async function ensureAdminUser(): Promise<void> {
         // Continue with other admin users even if one fails
       }
     }
+    
+    console.log(`[ADMIN_SETUP] ✅ Admin setup completed successfully`);
   } catch (error) {
     console.error('[ADMIN_SETUP] ❌ Error during admin user setup:', error);
     // Don't throw error to prevent app startup failure
   } finally {
-    adminSetupCompleted = true;
+    markAdminSetupCompleted();
   }
 }
 
 /**
- * Reset the admin setup flag (useful for testing)
+ * Reset the admin setup flag (useful for testing or forced re-setup)
  */
 export function resetAdminSetup(): void {
-  adminSetupCompleted = false;
+  globalThis.adminSetupCompleted = false;
+  
+  try {
+    if (fs.existsSync(ADMIN_SETUP_FLAG_FILE)) {
+      fs.unlinkSync(ADMIN_SETUP_FLAG_FILE);
+    }
+  } catch (error) {
+    console.log('[ADMIN_SETUP] Could not remove completion flag file');
+  }
 } 

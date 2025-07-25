@@ -20,7 +20,9 @@ import {
   ListItemText,
   Divider,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Menu,
+  MenuItem
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { 
@@ -55,6 +57,7 @@ interface HeaderProps {
 
 export default function Header({ session }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -64,6 +67,14 @@ export default function Header({ session }: HeaderProps) {
 
   const handleDrawerClose = () => {
     setMobileOpen(false);
+  };
+
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const MobileMenu = () => (
@@ -232,42 +243,58 @@ export default function Header({ session }: HeaderProps) {
                     >
                       Messages
                     </Button>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Link 
-                        href="/dashboard" 
-                        style={{
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          color: 'inherit',
+                    <Button
+                      variant="outlined"
+                      onClick={handleUserMenuClick}
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 1,
+                        px: 1.5,
+                        py: 0.5
+                      }}
+                    >
+                      <Avatar 
+                        sx={{ 
+                          width: 28, 
+                          height: 28, 
+                          bgcolor: '#3ab2df',
+                          fontSize: '0.75rem'
                         }}
                       >
-                        <Avatar 
-                          sx={{ 
-                            width: 32, 
-                            height: 32, 
-                            bgcolor: '#3ab2df',
-                            fontSize: '0.875rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {session.user?.name?.[0]?.toUpperCase()}
-                        </Avatar>
-                        <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer' }}>
-                          {session.user?.name}
-                        </Typography>
-                      </Link>
-                    </Box>
-                    <Button
-                      component={Link}
-                      href="/signout"
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                    >
-                      Sign out
+                        {session.user?.name?.[0]?.toUpperCase()}
+                      </Avatar>
+                      <Typography variant="body2" color="text.primary">
+                        {session.user?.name}
+                      </Typography>
                     </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleUserMenuClose}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                    >
+                      <MenuItem component={Link} href="/dashboard" onClick={handleUserMenuClose}>
+                        <ListItemIcon>
+                          <DashboardIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Dashboard" />
+                      </MenuItem>
+                      <Divider />
+                      <MenuItem component={Link} href="/signout" onClick={handleUserMenuClose}>
+                        <ListItemIcon>
+                          <LogoutIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Sign out" />
+                      </MenuItem>
+                    </Menu>
                   </>
                 ) : (
                   <>
