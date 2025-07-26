@@ -5,9 +5,9 @@ import { useParams } from 'next/navigation';
 import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link, Divider } from '@mui/material';
 import { VerifiedUser as VerifiedIcon } from '@mui/icons-material';
 import Image from 'next/image';
-import ChatButton from '@/components/ChatButton';
-import ReviewSummary from '@/components/ReviewSummary';
-import ReviewList from '@/components/ReviewList';
+import ChatButton from '../../../components/ChatButton';
+import ReviewSummary from '../../../components/ReviewSummary';
+import ReviewList from '../../../components/ReviewList';
 
 interface User {
   id: string;

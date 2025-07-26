@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Container, Typography, Box, TextField, Button, Paper, Alert, MenuItem, FormControl, InputLabel, Select, Card, CardContent, IconButton, Divider, Chip } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
-import { MultiImageUpload } from '@/components/MultiImageUpload';
+import { MultiImageUpload } from '../../../../components/MultiImageUpload';
 
 interface ImageFile {
   id: string;

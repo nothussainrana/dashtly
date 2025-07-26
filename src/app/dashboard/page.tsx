@@ -5,7 +5,7 @@ import { Container, Paper, Typography, Box, Avatar, Button, TextField, Alert, Di
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import { List as ListIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '../../components/ProductCard';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
