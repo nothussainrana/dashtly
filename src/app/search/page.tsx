@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Container, Typography, Box, Button, Pagination, CircularProgress, Alert, Paper, FormControl, InputLabel, Select, MenuItem, Slider } from '@mui/material';
 import { useEffect, useState } from 'react';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '../../components/ProductCard';
 
 interface Product {
   id: string;
