@@ -22,8 +22,8 @@ import {
   ArrowBack as ArrowBackIcon,
   LocalOffer as OfferIcon
 } from '@mui/icons-material';
-import OfferDialog from '../../../components/OfferDialog';
-import OfferCard from '../../../components/OfferCard';
+import OfferDialog from '@/components/OfferDialog';
+import OfferCard from '@/components/OfferCard';
 
 interface Message {
   id: string;
