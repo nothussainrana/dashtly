@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getDefaultCategories } from '../../../lib/categories';
+import { getDefaultCategories } from '@/lib/categories';
 
 declare global {
   var prisma: PrismaClient | undefined;

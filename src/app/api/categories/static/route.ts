@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getClientCategories } from '../../../../lib/categories';
+import { getClientCategories } from '@/lib/categories';
 
 export async function GET() {
   try {

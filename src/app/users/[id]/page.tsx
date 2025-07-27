@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia, Divider } from '@mui/material';
 import Image from 'next/image';
-import ProductCard from '../../../components/ProductCard';
-import ReviewSummary from '../../../components/ReviewSummary';
-import ReviewList from '../../../components/ReviewList';
+import ProductCard from '@/components/ProductCard';
+import ReviewSummary from '@/components/ReviewSummary';
+import ReviewList from '@/components/ReviewList';
 
 interface User {
   id: string;

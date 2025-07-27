@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Typography, Box, TextField, Button, Paper, Alert, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import { MultiImageUpload } from '../../../components/MultiImageUpload';
+import { MultiImageUpload } from '@/components/MultiImageUpload';
 
 interface ImageFile {
   id: string;
