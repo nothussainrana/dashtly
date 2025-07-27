@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link, Divider } from '@mui/material';
+import { Container, Paper, Typography, Box, Chip, CircularProgress, Avatar, Link, Divider, Button } from '@mui/material';
 import { VerifiedUser as VerifiedIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import ChatButton from '@/components/ChatButton';
 import ReviewSummary from '@/components/ReviewSummary';
 import ReviewList from '@/components/ReviewList';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -35,6 +37,8 @@ interface Product {
 
 export default function ProductPage() {
   const params = useParams();
+  const { data: session } = useSession();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +82,30 @@ export default function ProductPage() {
       console.error('Error fetching review stats:', err);
     } finally {
       setReviewsLoading(false);
+    }
+  };
+
+  const isOwner = session?.user?.id === product?.user.id;
+
+  const handleDelete = async () => {
+    if (!product) return;
+
+    if (confirm('Are you sure you want to delete this product?')) {
+      try {
+        const response = await fetch(`/api/products/${product.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          router.push('/dashboard');
+          router.refresh();
+        } else {
+          const data = await response.json();
+          setError(data.error || 'Failed to delete product');
+        }
+      } catch (err) {
+        setError('An error occurred while deleting the product.');
+      }
     }
   };
 
@@ -282,13 +310,30 @@ export default function ProductPage() {
             </Box>
           </Box>
 
-            {/* Chat Button */}
-            <ChatButton
-              productId={product.id}
-              sellerName={product.user.name}
-              sellerUsername={product.user.username}
-              sellerImage={product.user.image}
-            />
+          {isOwner ? (
+              <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                <Button 
+                  variant="contained" 
+                  onClick={() => router.push(`/products/${product.id}/edit`)}
+                >
+                  Edit Product
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="error"
+                  onClick={handleDelete}
+                >
+                  Delete Product
+                </Button>
+              </Box>
+            ) : (
+              <ChatButton
+                productId={product.id}
+                sellerName={product.user.name}
+                sellerUsername={product.user.username}
+                sellerImage={product.user.image}
+              />
+            )}
 
             <Typography variant="body2" color="text.secondary">
               Listed on {new Date(product.createdAt).toLocaleDateString()}

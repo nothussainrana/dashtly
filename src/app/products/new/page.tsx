@@ -12,6 +12,14 @@ interface ImageFile {
   file?: File;
 }
 
+interface ProductVariant {
+  name: string;
+  sku: string;
+  price: number | string;
+  stock: number | string;
+  attributes: Record<string, string>;
+}
+
 interface Category {
   id: string;
   name: string;
@@ -30,13 +38,15 @@ export default function NewProduct() {
     status: string;
     categoryId: string;
     images: ImageFile[];
+    variants: ProductVariant[];
   }>({
     name: '',
     price: '',
     description: '',
     status: 'active',
     categoryId: '',
-    images: []
+    images: [],
+    variants: []
   });
 
   // Fetch categories on component mount
@@ -65,6 +75,36 @@ export default function NewProduct() {
 
     fetchCategories();
   }, []);
+
+  const handleAddVariant = () => {
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { name: '', sku: '', price: '', stock: '', attributes: {} }]
+    }));
+  };
+
+  const handleRemoveVariant = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleVariantChange = (index: number, field: keyof ProductVariant, value: string | number) => {
+    const newVariants = [...formData.variants];
+    const variant = { ...newVariants[index] };
+
+    if (field === 'price' || field === 'stock') {
+        const numValue = value === '' ? '' : Number(value);
+        variant[field] = numValue;
+    } else {
+        (variant[field] as any) = value;
+    }
+
+    newVariants[index] = variant;
+    setFormData(prev => ({ ...prev, variants: newVariants }));
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,6 +150,11 @@ export default function NewProduct() {
           images: formData.images.map((img, index) => ({
             url: img.url,
             order: index
+          })),
+          variants: formData.variants.map(v => ({
+            ...v,
+            price: Number(v.price),
+            stock: Number(v.stock)
           }))
         }),
       });
@@ -254,6 +299,64 @@ export default function NewProduct() {
               }}
               maxImages={5}
             />
+          </Box>
+
+          <Box>
+            <Typography variant="h6" component="h2" sx={{ mt: 4, mb: 2 }}>
+                Product Variants
+            </Typography>
+            {formData.variants.map((variant, index) => (
+                <Paper key={index} elevation={2} sx={{ p: 3, mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="subtitle1">Variant {index + 1}</Typography>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleRemoveVariant(index)}
+                        >
+                            Remove
+                        </Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                            label="Variant Name (e.g., Small, Red)"
+                            value={variant.name}
+                            onChange={(e) => handleVariantChange(index, 'name', e.target.value)}
+                            fullWidth
+                        />
+                        <TextField
+                            label="SKU"
+                            value={variant.sku}
+                            onChange={(e) => handleVariantChange(index, 'sku', e.target.value)}
+                            fullWidth
+                        />
+                        <TextField
+                            label="Price"
+                            type="number"
+                            value={variant.price}
+                            onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                            fullWidth
+                            inputProps={{ step: "0.01", min: "0" }}
+                        />
+                        <TextField
+                            label="Stock"
+                            type="number"
+                            value={variant.stock}
+                            onChange={(e) => handleVariantChange(index, 'stock', e.target.value)}
+                            fullWidth
+                            inputProps={{ min: "0" }}
+                        />
+                    </Box>
+                </Paper>
+            ))}
+            <Button
+                type="button"
+                variant="contained"
+                onClick={handleAddVariant}
+                sx={{ mt: 2 }}
+            >
+                Add Variant
+            </Button>
           </Box>
           
           <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>

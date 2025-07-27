@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, Chip, CircularProgress, Badge } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, CircularProgress, Badge, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { VerifiedUser as VerifiedIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import ReviewSummary from './ReviewSummary';
+import { useRouter } from 'next/navigation';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -51,11 +52,13 @@ interface ProductCardProps {
     user?: User;
   };
   onClick?: () => void;
+  isOwner?: boolean;
 }
 
-export default function ProductCard({ product, onClick }: ProductCardProps) {
+export default function ProductCard({ product, onClick, isOwner = false }: ProductCardProps) {
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (product.user?.id) {
@@ -64,6 +67,30 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       setReviewsLoading(false);
     }
   }, [product.user?.id]);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this product?')) {
+      try {
+        const response = await fetch(`/api/products/${product.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          router.refresh();
+        } else {
+          alert('Failed to delete product.');
+        }
+      } catch (error) {
+        alert('An error occurred while deleting the product.');
+      }
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/products/${product.id}/edit`);
+  };
 
   const fetchReviewStats = async (sellerId: string) => {
     try {
@@ -213,6 +240,26 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
             </Typography>
           )}
         </Box>
+
+        {isOwner && (
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleEdit}
+            >
+              Edit
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </Box>
+        )}
 
         {/* Seller Rating */}
         {product.user && (

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import ReviewSummary from '@/components/ReviewSummary';
 import ReviewList from '@/components/ReviewList';
+import { useSession } from 'next-auth/react';
 
 interface User {
   id: string;
@@ -32,6 +33,7 @@ interface Product {
 
 export default function UserProfilePage() {
   const params = useParams();
+  const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +41,8 @@ export default function UserProfilePage() {
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsRefreshTrigger, setReviewsRefreshTrigger] = useState(0);
+
+  const isOwner = session?.user?.id === params.id;
 
   useEffect(() => {
     if (!params.id) return;
@@ -168,7 +172,7 @@ export default function UserProfilePage() {
             gap: 3 
           }}>
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} isOwner={isOwner} />
             ))}
           </Box>
         )}
