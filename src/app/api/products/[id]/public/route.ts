@@ -17,10 +17,7 @@ export async function GET(
 ) {
   try {
     const product = await prisma.product.findUnique({
-      where: {
-        id: params.id,
-        status: 'ACTIVE', // Only show active products publicly
-      },
+      where: { id: params.id },
       select: {
         id: true,
         name: true,
@@ -28,7 +25,6 @@ export async function GET(
         description: true,
         status: true,
         soldCount: true,
-        totalStock: true,
         createdAt: true,
         updatedAt: true,
         images: {
@@ -45,11 +41,10 @@ export async function GET(
             id: true,
             name: true,
             username: true,
-            image: true,
             role: true,
           }
         }
-      }
+      },
     });
 
     if (!product) {

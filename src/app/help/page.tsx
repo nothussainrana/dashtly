@@ -61,7 +61,7 @@ export default function HelpPage() {
             Need More Help?
           </Typography>
           <Typography variant="body1" paragraph>
-            If you couldn't find the answer you're looking for, our support team is here to help. You can:
+            If you couldn&apos;t find the answer you&apos;re looking for, our support team is here to help. You can:
           </Typography>
           <Box sx={{ mt: 2 }}>
             <Typography variant="body1" paragraph>

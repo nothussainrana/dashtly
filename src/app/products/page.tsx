@@ -8,14 +8,7 @@ import { useRouter } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import Image from 'next/image';
 
-interface ProductVariant {
-  id: string;
-  name: string;
-  price: number | null;
-  stock: number;
-  attributes: any;
-  isActive: boolean;
-}
+
 
 interface Product {
   id: string;
@@ -23,10 +16,9 @@ interface Product {
   price: number;
   description: string;
   status: string;
-  totalStock: number;
+  soldCount: number;
   createdAt: string;
   updatedAt: string;
-  variants: ProductVariant[];
   images: Array<{
     id: string;
     url: string;
@@ -235,7 +227,7 @@ export default function ProductsPage() {
               gap: 3 
             }}>
               {products.map((product) => (
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Card key={product.id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   {/* Product Image */}
                   {product.images.length > 0 && (
                     <Box sx={{ position: 'relative', height: 200 }}>
@@ -270,12 +262,9 @@ export default function ProductsPage() {
                         : product.description}
                     </Typography>
 
-                    {product.variants && product.variants.length > 0 && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {product.variants.length} variant{product.variants.length !== 1 ? 's' : ''} 
-                        • Stock: {product.totalStock}
-                      </Typography>
-                    )}
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Status: {product.status} • Sold: {product.soldCount}
+                    </Typography>
                   </CardContent>
 
                   <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
@@ -367,7 +356,7 @@ export default function ProductsPage() {
         <DialogTitle>Delete Product</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{selectedProduct?.name}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedProduct?.name}&quot;? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>

@@ -135,7 +135,7 @@ export default function LoginForm() {
 
       <Box sx={{ textAlign: "center", mt: 1 }}>
         <Link href="/register" style={{ textDecoration: "none" }}>
-          Don't have an account? Sign up
+          Don&apos;t have an account? Sign up
         </Link>
       </Box>
     </Box>

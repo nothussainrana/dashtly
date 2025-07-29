@@ -1,11 +1,12 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { Container, Paper, Typography, Box, Avatar, Button, TextField, Alert, Divider, IconButton } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, Button, TextField, Alert, Divider, IconButton, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import { List as ListIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import ProductCard from '@/components/ProductCard';
+import { isAdmin } from '@/lib/roles';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -71,15 +72,24 @@ export default function DashboardPage() {
     
     // Fetch both products and user data
     Promise.all([
-      fetch('/api/products').then(res => res.json()),
-      fetch(`/api/users/${session.user.id}`).then(res => res.json())
+      fetch('/api/products').then(res => {
+        if (!res.ok) throw new Error('Failed to fetch products');
+        return res.json();
+      }),
+      fetch(`/api/users/${session.user.id}`).then(res => {
+        if (!res.ok) throw new Error('Failed to fetch user data');
+        return res.json();
+      })
     ])
       .then(([productsData, userDataResponse]) => {
-        setProducts(productsData);
+        // Ensure products is always an array
+        setProducts(Array.isArray(productsData) ? productsData : []);
         setUserData(userDataResponse);
         setLoading(false);
       })
       .catch(err => {
+        console.error('Failed to load data:', err);
+        setProducts([]); // Ensure products is set to empty array on error
         setError('Failed to load data');
         setLoading(false);
       });
@@ -254,9 +264,23 @@ export default function DashboardPage() {
             {session.user?.name?.[0]?.toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Welcome back, {session.user?.name}!
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Typography variant="h4" component="h1">
+                Welcome back, {session.user?.name}!
+              </Typography>
+              {userData?.role && isAdmin(userData.role) && (
+                <Chip
+                  label="ADMIN"
+                  size="small"
+                  sx={{
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                  }}
+                />
+              )}
+            </Box>
             <Typography variant="body1" color="text.secondary">
               {session.user?.email}
             </Typography>

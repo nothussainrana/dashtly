@@ -220,9 +220,9 @@ export default function SearchPage() {
         {(initialQuery || categoryId) && (
           <Typography variant="body1" color="text.secondary">
             {initialQuery && categoryId ? (
-              <>Showing results for "{initialQuery}" in {categories.find(c => c.id === categoryId)?.name || 'category'}</>
+              <>Showing results for &quot;{initialQuery}&quot; in {categories.find(c => c.id === categoryId)?.name || 'category'}</>
             ) : initialQuery ? (
-              <>Showing results for "{initialQuery}"</>
+              <>Showing results for &quot;{initialQuery}&quot;</>
             ) : (
               <>Showing results in {categories.find(c => c.id === categoryId)?.name || 'category'}</>
             )}
@@ -321,7 +321,7 @@ export default function SearchPage() {
       ) : products.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            No products found
+            No products found for &quot;{initialQuery}&quot;
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Try adjusting your search criteria.

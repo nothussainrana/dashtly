@@ -176,7 +176,7 @@ export default function Home() {
             Browse by Category
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Find exactly what you're looking for by browsing our categories
+            Find exactly what you&apos;re looking for by browsing our categories
           </Typography>
         </Box>
         

@@ -140,7 +140,7 @@ export default function VerifyEmailPage() {
           </Typography>
           
           <Typography variant="body1" align="center" color="textSecondary" sx={{ mb: 3 }}>
-            We've sent a 6-digit verification code to{' '}
+            We&apos;ve sent a 6-digit verification code to{' '}
             <Typography component="span" fontWeight="bold">
               {email}
             </Typography>
@@ -197,7 +197,7 @@ export default function VerifyEmailPage() {
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Didn't receive the code?
+                Didn&apos;t receive the email? Check your spam folder or click resend below.
               </Typography>
               
               <Button

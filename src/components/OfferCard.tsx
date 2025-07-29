@@ -185,7 +185,7 @@ export default function OfferCard({ offer, currentUserId, onOfferUpdated }: Offe
 
         {offer.message && (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            "{offer.message}"
+            &quot;{offer.message}&quot;
           </Typography>
         )}
 

@@ -31,7 +31,7 @@ export default function ContactPage() {
                 Get in Touch
               </Typography>
               <Typography variant="body1" paragraph>
-                Have questions or feedback? We'd love to hear from you. Fill out the form and we'll get back to you as soon as possible.
+                We&apos;d love to hear from you! Whether you have questions, feedback, or need support, don&apos;t hesitate to reach out.
               </Typography>
 
               <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>

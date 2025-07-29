@@ -95,11 +95,6 @@ export async function PUT(
       );
     }
 
-    // Calculate total stock from variants if provided
-    const totalStock = variants ? variants.reduce((total: number, variant: any) => {
-      return total + (variant.stock || 0);
-    }, 0) : undefined;
-
     const updateData: any = {};
     
     if (name !== undefined) updateData.name = name.trim();
@@ -107,13 +102,17 @@ export async function PUT(
     if (description !== undefined) updateData.description = description.trim();
     if (status !== undefined) updateData.status = status;
     if (categoryId !== undefined) updateData.categoryId = categoryId;
-    if (totalStock !== undefined) updateData.totalStock = totalStock;
 
-    // Handle images update
+    // Handle images
     if (images) {
+      // Delete existing images
+      await prisma.productImage.deleteMany({
+        where: { productId: params.id }
+      });
+      
+      // Create new images
       updateData.images = {
-        deleteMany: {},
-        create: images.map((img: { url: string; order: number }) => ({
+        create: images.map((img: any) => ({
           url: img.url,
           order: img.order
         }))
@@ -126,10 +125,7 @@ export async function PUT(
         deleteMany: {},
         create: variants.map((variant: any) => ({
           name: variant.name,
-          sku: variant.sku,
           price: variant.price ? Number(variant.price) : null,
-          stock: variant.stock || 0,
-          attributes: variant.attributes || {},
           isActive: variant.isActive !== false
         }))
       };

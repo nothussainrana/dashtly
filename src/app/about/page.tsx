@@ -18,7 +18,19 @@ export default function AboutPage() {
             Our Mission
           </Typography>
           <Typography variant="body1" paragraph>
-            At Dashtly, we're building a trusted marketplace where people can buy and sell with confidence. Our platform is designed to make the process of buying and selling simple, secure, and enjoyable for everyone.
+            We&apos;re passionate about creating a trusted marketplace where buyers and sellers can connect with confidence.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Our platform combines the simplicity of peer-to-peer trading with advanced features like secure messaging, offer management, and seller verification. Whether you&apos;re looking to declutter your home or find unique items, Dashtly makes the process seamless and secure.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Founded on the principles of trust, transparency, and community, we&apos;re building more than just a marketplace – we&apos;re creating a community where great deals and lasting connections happen every day.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Join thousands of users who&apos;ve already discovered the Dashtly difference.
           </Typography>
         </Box>
 
@@ -38,7 +50,7 @@ export default function AboutPage() {
           <Typography variant="body1" paragraph>
             • Trust and Safety: We prioritize the security and trust of our community members.
             <br />
-            • User Experience: We're committed to providing an intuitive and enjoyable platform.
+            • User Experience: We&apos;re committed to providing an intuitive and enjoyable platform.
             <br />
             • Innovation: We continuously improve our services based on user feedback and market needs.
             <br />
@@ -51,7 +63,7 @@ export default function AboutPage() {
             Join Our Team
           </Typography>
           <Typography variant="body1" paragraph>
-            We're always looking for talented individuals who share our passion for creating a better marketplace. If you're interested in joining our team, please visit our careers page or contact us at careers@dashtly.com.
+            We&apos;re always looking for talented individuals who share our passion for creating a better marketplace. If you&apos;re interested in joining our team, please visit our careers page or contact us at careers@dashtly.com.
           </Typography>
         </Box>
 
@@ -60,7 +72,7 @@ export default function AboutPage() {
             Contact Us
           </Typography>
           <Typography variant="body1" paragraph>
-            Have questions or feedback? We'd love to hear from you. Reach out to us at contact@dashtly.com or visit our contact page for more ways to get in touch.
+            Have questions or feedback? We&apos;d love to hear from you. Reach out to us at contact@dashtly.com or visit our contact page for more ways to get in touch.
           </Typography>
         </Box>
       </Paper>

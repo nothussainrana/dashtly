@@ -70,10 +70,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Calculate total stock from variants
-    const totalStock = variants.reduce((total: number, variant: any) => {
-      return total + (variant.stock || 0);
-    }, 0);
+    // Validate variants if provided
+    if (variants && Array.isArray(variants)) {
+      for (const variant of variants) {
+        if (!variant.name || typeof variant.name !== 'string') {
+          return new NextResponse(
+            JSON.stringify({ error: 'Each variant must have a name' }),
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     try {
       const product = await prisma.product.create({
@@ -82,7 +89,6 @@ export async function POST(req: Request) {
           price: Number(price),
           description: description.trim(),
           status: productStatus as any,
-          totalStock,
           categoryId,
           userId: session.user.id,
           images: {
@@ -94,10 +100,7 @@ export async function POST(req: Request) {
           variants: {
             create: variants.map((variant: any) => ({
               name: variant.name,
-              sku: variant.sku,
               price: variant.price ? Number(variant.price) : null,
-              stock: variant.stock || 0,
-              attributes: variant.attributes || {},
               isActive: variant.isActive !== false
             }))
           }
@@ -147,7 +150,6 @@ export async function GET(req: Request) {
         description: true,
         status: true,
         soldCount: true,
-        totalStock: true,
         createdAt: true,
         updatedAt: true,
         images: {

@@ -72,7 +72,7 @@ export default function CareersPage() {
             Our Culture
           </Typography>
           <Typography variant="body1" paragraph>
-            At Dashtly, we're building more than just a marketplace - we're creating a community where people can buy and sell with confidence. We value innovation, collaboration, and a customer-first approach in everything we do.
+            At Dashtly, we&apos;re building more than just a marketplace - we&apos;re creating a community where people can buy and sell with confidence. We value innovation, collaboration, and a customer-first approach in everything we do.
           </Typography>
         </Box>
 
@@ -135,7 +135,7 @@ export default function CareersPage() {
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="body1" paragraph>
-            Don't see a position that matches your skills? We're always looking for talented individuals to join our team.
+            Don&apos;t see a position that matches your skills? We&apos;re always looking for talented individuals to join our team.
           </Typography>
           <Button variant="outlined" color="primary" size="large">
             Send Us Your Resume

@@ -2,19 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia, Divider } from '@mui/material';
+import { Container, Paper, Typography, Box, Avatar, CircularProgress, Card, CardContent, CardMedia, Chip } from '@mui/material';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import ReviewSummary from '@/components/ReviewSummary';
 import ReviewList from '@/components/ReviewList';
 import { useSession } from 'next-auth/react';
+import { isAdmin } from '@/lib/roles';
+import { UserRole } from '@prisma/client';
 
 interface User {
   id: string;
   name: string;
   username: string;
   image: string | null;
-  role?: string;
+  role?: UserRole;
 }
 
 interface Product {
@@ -114,9 +116,23 @@ export default function UserProfilePage() {
             {user.name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              {user.name || user.username}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Typography variant="h4" component="h1">
+                {user.name || user.username}
+              </Typography>
+              {user.role && isAdmin(user.role) && (
+                <Chip
+                  label="ADMIN"
+                  size="small"
+                  sx={{
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                  }}
+                />
+              )}
+            </Box>
             {user.name && (
               <Typography variant="body1" color="text.secondary" gutterBottom>
                 @{user.username}

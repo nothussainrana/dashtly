@@ -22,7 +22,7 @@ export default function TermsPage() {
             1. Acceptance of Terms
           </Typography>
           <Typography variant="body1" paragraph>
-            By accessing and using Dashtly, you accept and agree to be bound by the terms and provision of this agreement.
+            By accessing and using this website, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by the above, please do not use this service.
           </Typography>
         </Box>
 
@@ -31,7 +31,7 @@ export default function TermsPage() {
             2. Use License
           </Typography>
           <Typography variant="body1" paragraph>
-            Permission is granted to temporarily download one copy of the materials (information or software) on Dashtly's website for personal, non-commercial transitory viewing only.
+            Permission is granted to temporarily download one copy of the materials (information or software) on Dashtly&apos;s website for personal, non-commercial transitory viewing only.
           </Typography>
         </Box>
 
@@ -58,7 +58,12 @@ export default function TermsPage() {
             5. Disclaimer
           </Typography>
           <Typography variant="body1" paragraph>
-            The materials on Dashtly's website are provided on an 'as is' basis. Dashtly makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+            The materials on Dashtly&apos;s website are provided on an &apos;as is&apos; basis. Dashtly makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+          </Typography>
+        </Box>
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            We reserve the right to change these terms of service at any time. Users will be notified of any changes, and continued use of the service constitutes acceptance of the new terms.
           </Typography>
         </Box>
       </Paper>

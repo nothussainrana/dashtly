@@ -16,10 +16,7 @@ interface ImageFile {
 interface ProductVariant {
   id?: string;
   name: string;
-  sku?: string;
   price?: number | null;
-  stock: number;
-  attributes: Record<string, any>;
   isActive: boolean;
 }
 
@@ -142,10 +139,7 @@ export default function EditProduct() {
           })),
           variants: formData.variants.map(variant => ({
             name: variant.name,
-            sku: variant.sku,
             price: variant.price ? Number(variant.price) : null,
-            stock: variant.stock,
-            attributes: variant.attributes,
             isActive: variant.isActive
           }))
         }),
@@ -193,10 +187,7 @@ export default function EditProduct() {
       ...prev,
       variants: [...prev.variants, {
         name: '',
-        sku: '',
         price: null,
-        stock: 0,
-        attributes: {},
         isActive: true
       }]
     }));
@@ -216,22 +207,6 @@ export default function EditProduct() {
       ...prev,
       variants: prev.variants.filter((_, i) => i !== index)
     }));
-  };
-
-  const addVariantAttribute = (variantIndex: number) => {
-    const key = prompt('Enter attribute name (e.g., "color", "size"):');
-    const value = prompt('Enter attribute value:');
-    
-    if (key && value) {
-      setFormData(prev => ({
-        ...prev,
-        variants: prev.variants.map((variant, i) => 
-          i === variantIndex 
-            ? { ...variant, attributes: { ...variant.attributes, [key]: value } }
-            : variant
-        )
-      }));
-    }
   };
 
   if (loading) {
@@ -384,13 +359,6 @@ export default function EditProduct() {
 
                       <Box sx={{ display: 'flex', gap: 2 }}>
                         <TextField
-                          label="SKU (Optional)"
-                          value={variant.sku || ''}
-                          onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                          size="small"
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
                           label="Price (Optional - uses base price if empty)"
                           type="number"
                           value={variant.price || ''}
@@ -399,43 +367,6 @@ export default function EditProduct() {
                           sx={{ flex: 1 }}
                           inputProps={{ step: "0.01", min: "0" }}
                         />
-                        <TextField
-                          label="Stock"
-                          type="number"
-                          value={variant.stock}
-                          onChange={(e) => updateVariant(index, 'stock', Number(e.target.value))}
-                          size="small"
-                          sx={{ flex: 1 }}
-                          inputProps={{ min: "0" }}
-                        />
-                      </Box>
-
-                      <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Attributes
-                          </Typography>
-                          <Button
-                            size="small"
-                            onClick={() => addVariantAttribute(index)}
-                          >
-                            Add Attribute
-                          </Button>
-                        </Box>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {Object.entries(variant.attributes).map(([key, value]) => (
-                            <Chip
-                              key={key}
-                              label={`${key}: ${value}`}
-                              onDelete={() => {
-                                const newAttributes = { ...variant.attributes };
-                                delete newAttributes[key];
-                                updateVariant(index, 'attributes', newAttributes);
-                              }}
-                              size="small"
-                            />
-                          ))}
-                        </Box>
                       </Box>
                     </Box>
                   </CardContent>

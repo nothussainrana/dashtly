@@ -155,7 +155,7 @@ export default function ChatPage() {
             No messages yet
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Start a conversation by clicking "Chat with Seller" on any product
+            Start a conversation by clicking &quot;Chat with Seller&quot; on any product
           </Typography>
         </Paper>
       ) : (

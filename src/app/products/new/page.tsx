@@ -14,10 +14,7 @@ interface ImageFile {
 
 interface ProductVariant {
   name: string;
-  sku: string;
   price: number | string;
-  stock: number | string;
-  attributes: Record<string, string>;
 }
 
 interface Category {
@@ -79,7 +76,7 @@ export default function NewProduct() {
   const handleAddVariant = () => {
     setFormData(prev => ({
       ...prev,
-      variants: [...prev.variants, { name: '', sku: '', price: '', stock: '', attributes: {} }]
+      variants: [...prev.variants, { name: '', price: '' }]
     }));
   };
 
@@ -94,7 +91,7 @@ export default function NewProduct() {
     const newVariants = [...formData.variants];
     const variant = { ...newVariants[index] };
 
-    if (field === 'price' || field === 'stock') {
+    if (field === 'price') {
         const numValue = value === '' ? '' : Number(value);
         variant[field] = numValue;
     } else {
@@ -104,7 +101,6 @@ export default function NewProduct() {
     newVariants[index] = variant;
     setFormData(prev => ({ ...prev, variants: newVariants }));
 };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,8 +149,7 @@ export default function NewProduct() {
           })),
           variants: formData.variants.map(v => ({
             ...v,
-            price: Number(v.price),
-            stock: Number(v.stock)
+            price: Number(v.price)
           }))
         }),
       });
@@ -325,26 +320,12 @@ export default function NewProduct() {
                             fullWidth
                         />
                         <TextField
-                            label="SKU"
-                            value={variant.sku}
-                            onChange={(e) => handleVariantChange(index, 'sku', e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
                             label="Price"
                             type="number"
                             value={variant.price}
                             onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
                             fullWidth
                             inputProps={{ step: "0.01", min: "0" }}
-                        />
-                        <TextField
-                            label="Stock"
-                            type="number"
-                            value={variant.stock}
-                            onChange={(e) => handleVariantChange(index, 'stock', e.target.value)}
-                            fullWidth
-                            inputProps={{ min: "0" }}
                         />
                     </Box>
                 </Paper>
